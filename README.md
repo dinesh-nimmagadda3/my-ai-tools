@@ -16,7 +16,7 @@
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
-- 📦 **Plugin support** - Official and community plugins
+- 🧩 **Skills architecture** - Reusable playbooks and automated workflows
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
 
 ## 🎬 Demo
@@ -280,137 +280,54 @@ Replace deprecated `claude-mem` with **qmd-based knowledge system**:
 - No repository pollution
 - See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
 
-### Plugins
+### Skills
 
-#### Prerequisites
-
-Before installing plugins, ensure:
-
-1. **Claude Code subscription** - Active subscription with plugin support
-2. **Plugin marketplace access** - Verify marketplace is enabled for your repository
-3. **Network connectivity** - Required for downloading marketplace plugins
-
-To check marketplace availability:
-
-```bash
-# Verify Claude CLI supports plugins
-claude plugin list
-
-# If the above fails, check your Claude Code installation and subscription
-```
+Claude Code uses a "skills" architecture to extend its capabilities. Skills are specialized "playbooks" (instructions, templates, and context) defined in `SKILL.md` files.
 
 #### Installation
 
-The setup script (`./cli.sh`) automatically checks marketplace availability before installing plugins. If marketplace is unavailable, it will offer to install local plugins only.
+The setup script (`./cli.sh`) installs community skills from this repository to your global configuration.
 
-**Automated installation (recommended):**
+**Automated installation:**
 
 ```bash
-./cli.sh  # Includes marketplace check and fallback to local plugins
+./cli.sh
 ```
 
-**Manual installation** (requires marketplace access):
+**Manual installation (Remote):**
 
 ```bash
-# First, add the official marketplace
-claude plugin marketplace add anthropics/claude-plugins-official
-
-# Official plugins
-claude plugin install typescript-lsp@claude-plugins-official
-claude plugin install pyright-lsp@claude-plugins-official
-claude plugin install context7@claude-plugins-official
-claude plugin install frontend-design@claude-plugins-official
-claude plugin install learning-output-style@claude-plugins-official
-claude plugin install swift-lsp@claude-plugins-official
-claude plugin install lua-lsp@claude-plugins-official
-claude plugin install code-simplifier@claude-plugins-official
-claude plugin install rust-analyzer-lsp@claude-plugins-official
-claude plugin install claude-md-management@claude-plugins-official
-
-# Community plugins (add marketplace first)
-# Plugin installation format: plugin-name@marketplace-name
-# Example: The repository 'backnotprop/plannotator' registers as marketplace 'plannotator',
-#          then you install plugin 'plannotator' from that marketplace
-claude plugin marketplace add backnotprop/plannotator
-claude plugin install plannotator@plannotator
-
-claude plugin marketplace add jarrodwatts/claude-hud
-claude plugin install claude-hud@claude-hud
-
-claude plugin marketplace add max-sixty/worktrunk
-claude plugin install worktrunk@worktrunk
-
-claude plugin marketplace add openai/codex-plugin-cc
-claude plugin install codex@openai-codex
-
-# Install skills from this repository (jellydn/my-ai-tools)
-# Recommended: Install all skills at once using npx skills add
+# Install all skills at once using npx skills add
 npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
 
 # Or install interactively (select which skills to install)
 npx skills add jellydn/my-ai-tools --global --agent claude-code
-
-# Available skills: prd, ralph, qmd-knowledge, codemap, adr, handoffs, pickup, pr-review, slop, tdd
-# Skills are installed to ~/.agents/skills/ with symlinks in ~/.claude/skills/
 ```
 
-#### Troubleshooting
+#### Available Skills
 
-**Skills installation issues?**
+| Skill           | Description                         |
+| --------------- | ----------------------------------- |
+| `prd`           | Product Requirements Documents      |
+| `ralph`         | PRD to JSON converter               |
+| `qmd-knowledge` | Project knowledge management        |
+| `codemap`       | Parallel codebase analysis          |
+| `adr`           | Architecture Decision Records       |
+| `handoffs`      | Session handoff notes               |
+| `pickup`        | Resume previous context             |
+| `pr-review`     | Automated Pull Request reviews      |
+| `slop`          | AI slop/redundancy remover          |
+| `tdd`           | Test-Driven Development workflows    |
 
-If you encounter issues:
+#### Key Skills
 
-1. **Check npx availability**: Ensure Node.js and npx are installed (`npx --version`)
-2. **Use local skills**: The setup script automatically falls back to local skills from `skills/` folder
-3. **Manual installation**: Copy skill folders directly to `~/.claude/skills/`
-4. **Interactive mode**: Run without `--yes` flag to select specific skills
+**`codemap`** - Orchestrates parallel codebase analysis producing structured documentation in `.planning/codebase/`.
 
-**Common issues:**
+**`qmd-knowledge`** - Project-specific knowledge management ([guide](docs/qmd-knowledge-management.md)).
 
-- "npx not found" → Install Node.js to use remote skill installation, or use local skills via `./cli.sh`
-- "Permission denied" → Try running without sudo, or use `--global` flag
-- "Skills already installed" → Remove existing skills first with `npx skills remove --global`
+**`prd`** - Generate Product Requirements Documents.
 
-#### Plugin List
-
-| Plugin                  | Description                         | Source            |
-| ----------------------- | ----------------------------------- | ----------------- |
-| `typescript-lsp`        | TypeScript language server          | Official          |
-| `pyright-lsp`           | Python language server              | Official          |
-| `context7`              | Documentation lookup                | Official          |
-| `frontend-design`       | UI/UX design assistance             | Official          |
-| `learning-output-style` | Interactive learning mode           | Official          |
-| `swift-lsp`             | Swift language support              | Official          |
-| `lua-lsp`               | Lua language support                | Official          |
-| `code-simplifier`       | Code simplification                 | Official          |
-| `rust-analyzer-lsp`     | Rust language support               | Official          |
-| `claude-md-management`  | Markdown management                 | Official          |
-| `plannotator`           | Plan annotation tool                | Community         |
-| `prd`                   | Product Requirements Documents      | Local Marketplace |
-| `ralph`                 | PRD to JSON converter               | Local Marketplace |
-| `qmd-knowledge`         | Project knowledge management        | Local Marketplace |
-| `codemap`               | Parallel codebase analysis          | Local Marketplace |
-| `claude-hud`            | Status line with usage monitoring   | Community         |
-| `worktrunk`             | Work management                     | Community         |
-| `codex`                 | Codex code review & task delegation | Community         |
-
-#### Key Marketplace Plugins
-
-**`codemap`** - Orchestrates parallel codebase analysis producing 7 structured documents in `.planning/codebase/`:
-
-- `STACK.md` - Technologies, dependencies, configuration
-- `INTEGRATIONS.md` - 3rd party APIs, databases, auth
-- `ARCHITECTURE.md` - System patterns, layers, data flow
-- `STRUCTURE.md` - Directory layout, key locations
-- `CONVENTIONS.md` - Code style, patterns, error handling
-- `TESTING.md` - Framework, structure, mocking, coverage
-- `CONCERNS.md` - Tech debt, bugs, security issues
-
-**`prd`** - Generate Product Requirements Documents
-
-**`ralph`** - Convert PRDs to JSON for autonomous agent execution
-
-**`qmd-knowledge`** - Project-specific knowledge management ([guide](docs/qmd-knowledge-management.md))
+**`ralph`** - Convert PRDs to JSON for autonomous agent execution.
 
 ### Hooks & Status Line
 

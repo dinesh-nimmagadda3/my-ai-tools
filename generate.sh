@@ -20,10 +20,7 @@ for arg in "$@"; do
 	esac
 done
 
-skill_exists_in_plugins() {
-	local skill_name="$1"
-	[ -d "$SCRIPT_DIR/skills/$skill_name" ]
-}
+
 
 copy_single() {
 	local src="$1"
@@ -73,9 +70,9 @@ copy_claude_subdirectory() {
 	fi
 }
 
-# Copy skills with marketplace plugin filtering
-# Usage: copy_skills_with_filter "source_dir" "dest_dir" "tool_name"
-copy_skills_with_filter() {
+# Copy skills
+# Usage: copy_skills_without_filter "source_dir" "dest_dir" "tool_name"
+copy_skills_without_filter() {
 	local source_dir="$1"
 	local dest_dir="$2"
 	local tool_name="${3:-Claude Code}"
@@ -90,25 +87,7 @@ copy_skills_with_filter() {
 	fi
 
 	execute "mkdir -p '$dest_dir'"
-	for skill_dir in "$source_dir"/*; do
-		if [ ! -d "$skill_dir" ]; then
-			continue
-		fi
-		local skill_name
-		skill_name="$(basename "$skill_dir")"
-		case "$skill_name" in
-		prd | ralph | qmd-knowledge | codemap)
-			# Skip marketplace plugins - managed separately
-			;;
-		*)
-			if skill_exists_in_plugins "$skill_name"; then
-				log_info "Skipping $skill_name (exists in skills)"
-			elif execute "cp -r '$skill_dir' '$dest_dir'/ 2>/dev/null"; then
-				log_success "Copied skill: $skill_name"
-			fi
-			;;
-		esac
-	done
+	execute "cp -r '$source_dir'/* '$dest_dir'/ 2>/dev/null || true"
 }
 
 generate_claude_configs() {
@@ -122,14 +101,13 @@ generate_claude_configs() {
 	execute "mkdir -p $SCRIPT_DIR/configs/claude"
 
 	# Copy core files
-	copy_single "$HOME/.claude/mcp-servers.json" "$SCRIPT_DIR/configs/claude/mcp-servers.json"
 	copy_single "$HOME/.claude/CLAUDE.md" "$SCRIPT_DIR/configs/claude/CLAUDE.md"
 
 	# Copy subdirectories
 	copy_claude_subdirectory "$HOME/.claude/commands" "$SCRIPT_DIR/configs/claude/commands" "commands"
 	copy_claude_subdirectory "$HOME/.claude/agents" "$SCRIPT_DIR/configs/claude/agents" "agents"
 	copy_claude_subdirectory "$HOME/.claude/hooks" "$SCRIPT_DIR/configs/claude/hooks" "hooks"
-	copy_skills_with_filter "$HOME/.claude/skills" "$SCRIPT_DIR/configs/claude/skills" "Claude Code"
+	copy_skills_without_filter "$HOME/.claude/skills" "$SCRIPT_DIR/configs/claude/skills" "Claude Code"
 
 	# Copy settings.json (with Windows path fix)
 	copy_claude_settings

@@ -784,9 +784,9 @@ install_gemini() {
 
 
 
-# Helper: Copy non-marketplace skills from source to destination
-# Usage: copy_non_marketplace_skills "source_dir" "dest_dir"
-copy_non_marketplace_skills() {
+# Helper: Copy skills from source to destination
+# Usage: copy_skills "source_dir" "dest_dir"
+copy_skills() {
 	local source_dir="$1"
 	local dest_dir="$2"
 
@@ -809,12 +809,9 @@ copy_non_marketplace_skills() {
 			continue
 		fi
 
-		local skill_name
-		skill_name="$(basename "$skill_dir")"
-
 		case "$skill_name" in
 		prd | ralph | qmd-knowledge | codemap | adr | handoffs | pickup | pr-review | slop | tdd | grill-me | plannotator-compound | plannotator-review)
-			# Skip marketplace plugins and skills that conflict with ~/.agents/skills/
+			# Skip skills that conflict with ~/.agents/skills/
 			;;
 		*)
 			safe_copy_dir "$skill_dir" "$dest_dir/$skill_name"
@@ -950,7 +947,6 @@ copy_claude_configs() {
 
 	# Copy core configs
 	execute_quoted cp "$SCRIPT_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
-	execute_quoted cp "$SCRIPT_DIR/configs/claude/mcp-servers.json" "$HOME/.claude/mcp-servers.json"
 	execute_quoted cp "$SCRIPT_DIR/configs/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 
 	# Copy directories
@@ -1018,7 +1014,7 @@ copy_opencode_configs() {
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
 
 	execute_quoted rm -rf "$HOME/.config/opencode/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
+	copy_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
 
 	log_success "OpenCode configs copied"
 }
@@ -1035,7 +1031,7 @@ copy_amp_configs() {
 	execute_quoted mkdir -p "$HOME/.config/amp"
 	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
 
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
+	copy_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
 
 	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
 		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
@@ -1121,7 +1117,7 @@ copy_gemini_configs() {
 	safe_copy_dir "$SCRIPT_DIR/configs/gemini/policies" "$HOME/.gemini/policies"
 
 	execute_quoted rm -rf "$HOME/.gemini/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
+	copy_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
 
 	log_success "Gemini CLI configs copied"
 }
@@ -1165,7 +1161,7 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
 
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/pi/skills" "$HOME/.pi/agent/skills"
+	copy_skills "$SCRIPT_DIR/configs/pi/skills" "$HOME/.pi/agent/skills"
 
 	log_success "Pi configs copied"
 }
@@ -1210,7 +1206,7 @@ copy_cursor_configs() {
 	fi
 
 	execute_quoted rm -rf "$HOME/.cursor/skills"
-	copy_non_marketplace_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
+	copy_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
 
 	execute_quoted rm -rf "$HOME/.cursor/commands"
 	safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
@@ -1253,45 +1249,7 @@ copy_best_practices() {
 	fi
 }
 
-# Check if Claude CLI supports plugin marketplace functionality
-check_marketplace_support() {
-	if ! command -v claude &>/dev/null; then
-		log_error "Claude Code CLI not found"
-		return 1
-	fi
 
-	if ! claude plugin --help &>/dev/null; then
-		log_warning "Claude CLI does not support plugin commands"
-		return 1
-	fi
-
-	if ! claude plugin list &>/dev/null; then
-		log_warning "Unable to list plugins. Plugin marketplace may not be available"
-		return 1
-	fi
-
-	return 0
-}
-
-# Attempt to add marketplace repository and verify accessibility
-try_add_marketplace_repo() {
-	local marketplace_repo="$1"
-
-	# Extract owner/repo format
-	local owner_repo=""
-	if [[ "$marketplace_repo" == *"/"* ]] && [[ "$marketplace_repo" != /* ]]; then
-		owner_repo="$marketplace_repo"
-	else
-		return 0
-	fi
-
-	if claude plugin marketplace add "$owner_repo" 2>/dev/null; then
-		return 0
-	else
-		log_warning "Marketplace repository '$owner_repo' may not be accessible"
-		return 1
-	fi
-}
 
 # Helper: Install remote skills using npx skills add
 install_remote_skills() {
@@ -1470,58 +1428,15 @@ install_cli_dependency() {
 	esac
 }
 
-enable_plugins() {
-	log_info "Installing Claude Code plugins..."
-
-	MARKETPLACE_AVAILABLE=false
-	if check_marketplace_support; then
-		MARKETPLACE_AVAILABLE=true
-	else
-		log_warning "Claude plugin marketplace is not available"
-		log_info "Note: Skills can still be installed remotely using the npx skills add command"
-	fi
-
-	# Determine skill installation source
-	determine_skill_install_source
-
-	# Define plugins
-	official_plugins=(
-		"typescript-lsp@claude-plugins-official"
-		"pyright-lsp@claude-plugins-official"
-		"context7@claude-plugins-official"
-		"frontend-design@claude-plugins-official"
-		"learning-output-style@claude-plugins-official"
-		"swift-lsp@claude-plugins-official"
-		"lua-lsp@claude-plugins-official"
-		"code-simplifier@claude-plugins-official"
-		"rust-analyzer-lsp@claude-plugins-official"
-		"claude-md-management@claude-plugins-official"
-	)
-
-	# Community plugins: "name|plugin_spec|marketplace_repo|cli_tool"
-	community_plugins=(
-		"plannotator|plannotator@plannotator|backnotprop/plannotator|claude"
-		"plannotator-copilot|plannotator-copilot@plannotator|backnotprop/plannotator|copilot"
-		"prd|prd@my-ai-tools|$SCRIPT_DIR|claude"
-		"ralph|ralph@my-ai-tools|$SCRIPT_DIR|claude"
-		"qmd-knowledge|qmd-knowledge@my-ai-tools|$SCRIPT_DIR|claude"
-		"codemap|codemap@my-ai-tools|$SCRIPT_DIR|claude"
-		"claude-hud|claude-hud@claude-hud|jarrodwatts/claude-hud|claude"
-		"worktrunk|worktrunk@worktrunk|max-sixty/worktrunk|claude"
-		"openai-codex|codex@openai-codex|openai/codex-plugin-cc|claude"
-	)
+install_skills() {
+	log_info "Installing Claude Code skills..."
 
 	if ! command -v claude &>/dev/null; then
-		handle_no_claude_cli
+		log_warning "Claude Code not installed - skipping skill installation"
 		return 0
 	fi
 
-	install_plugins_if_marketplace_available
-
-	install_recommended_skills
-}
-
-determine_skill_install_source() {
+	# Determine skill installation source
 	if [ "${YES_TO_ALL:-false}" = "true" ]; then
 		SKILL_INSTALL_SOURCE="local"
 	elif [ -t 0 ]; then
@@ -1536,191 +1451,15 @@ determine_skill_install_source() {
 	else
 		SKILL_INSTALL_SOURCE="local"
 	fi
-}
-
-handle_no_claude_cli() {
-	log_warning "Claude Code not installed - skipping official marketplace plugin installation"
-	log_info "Note: Community skills can still be installed without Claude CLI"
 
 	if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
 		install_local_skills
 	else
 		install_remote_skills
 	fi
-	log_success "Community skills installation complete"
+
 	install_recommended_skills
 	cleanup_duplicate_skills
-}
-
-install_plugins_if_marketplace_available() {
-	if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
-		log_info "Skipping official marketplace plugins (claude plugin command unavailable)"
-	else
-		install_official_plugins
-	fi
-
-	install_community_skills
-
-	log_success "Claude Code plugins/skills installation complete"
-	log_info "IMPORTANT: Restart Claude Code for plugins to take effect"
-}
-
-install_official_plugins() {
-	log_info "Adding official plugins marketplace..."
-	if ! execute "claude plugin marketplace add 'anthropics/claude-plugins-official' 2>/dev/null"; then
-		log_info "Official plugins marketplace may already be added"
-	fi
-
-	if ! try_add_marketplace_repo "anthropics/claude-plugins-official"; then
-		log_warning "Official plugins marketplace may not be accessible"
-		MARKETPLACE_AVAILABLE=false
-		return 0
-	fi
-
-	if [ "${MARKETPLACE_AVAILABLE:-false}" = "false" ]; then
-		return 0
-	fi
-
-	log_info "Installing official plugins..."
-	if [ -t 0 ]; then
-		for plugin in "${official_plugins[@]}"; do
-			install_plugin "$plugin"
-		done
-	else
-		install_official_plugins_parallel
-	fi
-}
-
-install_official_plugins_parallel() {
-	log_info "Installing plugins in parallel..."
-	if [ "$DRY_RUN" = true ]; then
-		for plugin in "${official_plugins[@]}"; do
-			log_info "[DRY RUN] Would install $plugin"
-		done
-		return 0
-	fi
-	local pids=()
-
-	for plugin in "${official_plugins[@]}"; do
-		(
-			setup_tmpdir
-			if execute "claude plugin install '$plugin' 2>/dev/null"; then
-				log_success "$plugin installed"
-			else
-				log_warning "$plugin may already be installed"
-			fi
-		) &
-		pids+=($!)
-	done
-
-	for pid in "${pids[@]}"; do
-		wait "$pid" 2>/dev/null || true
-	done
-	log_success "Official plugins installation complete"
-}
-
-install_plugin() {
-	local plugin="$1"
-
-	if [ "$YES_TO_ALL" = true ]; then
-		setup_tmpdir
-		execute "claude plugin install '$plugin' 2>/dev/null" || log_warning "$plugin install failed (may already be installed)"
-	elif [ -t 0 ]; then
-		if prompt_yn "Install $plugin"; then
-			setup_tmpdir
-			execute "claude plugin install '$plugin' && log_success '$plugin installed' || log_warning '$plugin install failed (may already be installed)'"
-		fi
-	else
-		setup_tmpdir
-		execute "claude plugin install '$plugin' 2>/dev/null" || log_warning "$plugin install failed (may already be installed)"
-	fi
-}
-
-install_community_skills() {
-	if [ "$SKILL_INSTALL_SOURCE" = "local" ]; then
-		log_info "Installing community skills from local skills folder..."
-		install_local_skills
-		install_local_community_plugins
-	else
-		install_remote_skills
-		install_local_community_plugins
-	fi
-}
-
-install_local_community_plugins() {
-	# Only install CLI-based plugins (non-remote skills) if Claude CLI is available
-	if ! command -v claude &>/dev/null; then
-		return 0
-	fi
-
-	for plugin_entry in "${community_plugins[@]}"; do
-		local name plugin_spec marketplace_repo cli_tool
-		name="${plugin_entry%%|*}"
-
-		# Skip remote skills - they're installed from local skills folder or npx
-		is_remote_skill "$name" && continue
-
-		local rest="${plugin_entry#*|}"
-		plugin_spec="${rest%%|*}"
-		local rest2="${rest#*|}"
-		marketplace_repo="${rest2%%|*}"
-		cli_tool="${rest2##*|}"
-
-		install_community_plugin "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
-	done
-}
-
-install_community_plugin() {
-	local name="$1"
-	local plugin_spec="$2"
-	local marketplace_repo="$3"
-	local cli_tool="${4:-claude}"
-
-	if [ "$YES_TO_ALL" = true ] || [ ! -t 0 ]; then
-		install_community_plugin_non_interactive "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
-	elif [ -t 0 ]; then
-		install_community_plugin_interactive "$name" "$plugin_spec" "$marketplace_repo" "$cli_tool"
-	fi
-}
-
-install_community_plugin_non_interactive() {
-	local name="$1"
-	local plugin_spec="$2"
-	local marketplace_repo="$3"
-	local cli_tool="$4"
-
-	install_cli_dependency "$name"
-
-	setup_tmpdir
-	execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null || true"
-	cleanup_plugin_cache "$cli_tool" "$name"
-	if ! execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
-		log_warning "$name plugin install failed (may already be installed)"
-	fi
-}
-
-install_community_plugin_interactive() {
-	local name="$1"
-	local plugin_spec="$2"
-	local marketplace_repo="$3"
-	local cli_tool="$4"
-
-	if ! prompt_yn "Install $name"; then
-		return 0
-	fi
-
-	install_cli_dependency "$name"
-
-	setup_tmpdir
-	if ! execute "$cli_tool plugin marketplace add '$marketplace_repo' 2>/dev/null"; then
-		log_info "Marketplace $marketplace_repo may already be added"
-	fi
-	cleanup_plugin_cache "$cli_tool" "$name"
-	if execute "$cli_tool plugin install '$plugin_spec' 2>/dev/null"; then
-		log_success "$name installed"
-	else
-		log_warning "$name install failed (may already be installed)"
-	fi
 }
 
 # Extract compatibility field from SKILL.md
@@ -1945,7 +1684,7 @@ main() {
 	copy_configurations
 	echo
 
-	enable_plugins
+	install_skills
 	echo
 
 	log_success "Setup complete!"
@@ -1953,7 +1692,7 @@ main() {
 	echo "Next steps:"
 	echo "  1. Restart your terminal"
 	echo "  2. Run 'claude' to start Claude Code"
-	echo "  3. Enable plugins with 'claude plugin enable <plugin-name>'"
+	echo "  3. Use slash commands like /help to see available skills"
 	echo "  4. Check out the README.md for more information"
 	echo
 
