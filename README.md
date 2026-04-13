@@ -1,535 +1,191 @@
-# Welcome to my-ai-tools 👋
+# my-ai-tools 🤖
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, Gemini CLI, OpenCode, and Codex with custom configurations, MCP servers, skills, and commands.
+> **A portable, interactive setup kit for AI coding tools** — Install, configure, and connect Claude Code, Gemini CLI, OpenCode, and Codex in minutes on any machine, powered by a centralized **Shared MCP Hub (V5)**.
 
 ## ✨ Features
 
-- 🚀 **One-line installer** - Get started in seconds
-- 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, Gemini CLI, OpenCode, and Codex
-- 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
-- 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
-- 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
-- 🧩 **Skills architecture** - Reusable playbooks and automated workflows
-- 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
+- 🧙‍♂️ **Interactive Setup Wizard** — Select exactly which tools and MCP servers to install
+- 🌐 **One-line installer** — No cloning needed, just run a `curl` command
+- 🔗 **Shared MCP Hub (V5)** — One central hub connects all tools via Streamable HTTP
+- 🔄 **Bidirectional sync** — Install configs or export your current setup
+- 🤖 **4 AI Tools supported** — Claude Code, Gemini CLI, OpenCode, and Codex
+- 🧩 **Skills architecture** — Select and install skills per-tool or apply to all
+- 🛡️ **Git Guard Hook** — Prevents dangerous git commands (force push, hard reset, etc.)
+- 📦 **Zero clutter** — Installs to your home directory; the repo stays temporary
 
-## 📋 Prerequisites
-
-### All Platforms
-
-- **Bun or Node.js LTS** - Runtime for tools and scripts
-- **Git** - Version control
-- **Claude Code subscription**
-
-### Windows-Specific
-
-- **Git for Windows** - Required for Git Bash support
-  - Download: https://git-scm.com/download/win
-  - Make sure to select "Git from the command line and also from 3rd-party software" during installation
-- **PowerShell 5.1+** - For the PowerShell installer
-- **jq** - Will be auto-installed via winget if available, or download from [GitHub releases](https://github.com/jqlang/jq/releases)
+---
 
 ## 🚀 Quick Start
 
 ### One-Line Installer (Recommended)
 
-Install directly from GitHub without cloning the repository:
+Run this on any machine. No cloning required:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main/install.sh | bash
 ```
 
-> **Security Note:** Review the script before running:
->
+> **Want to preview first?** Run with `--dry-run`:
+> ```bash
+> curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main/install.sh | bash -s -- --dry-run
+> ```
+
+> **Security review before running:**
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main/install.sh -o install.sh
-> cat install.sh  # Review the script
+> cat install.sh
 > bash install.sh
 > ```
 
-> **GitHub Pages Alternative:** If you enable GitHub Pages for this repo, you can also use:
-> ```bash
-> curl -fsSL https://dinesh-nimmagadda3.github.io/my-ai-tools/install.sh | bash
-> ```
-
-**Options:**
-
+**Available flags:**
 ```bash
-# Preview changes without making them
-curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --dry-run
-
-# Backup existing configs before installing
-curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --backup
-
-# Skip backup prompt
-curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
+--dry-run      # Preview what would be changed (safe)
+--backup       # Backup existing configs before installing
+--no-backup    # Skip backup prompt
+--yes / -y     # Auto-select all components (non-interactive)
 ```
 
-### Manual Installation
-
-Clone the repository and run the installer:
+### Manual Installation (Alternative)
 
 ```bash
-git clone <your-private-repo-url>
+git clone https://github.com/dinesh-nimmagadda3/my-ai-tools.git
 cd my-ai-tools
 ./cli.sh
 ```
-
-**Options:**
-
-- `--dry-run` - Preview changes without making them
-- `--backup` - Backup existing configs before installing
-- `--no-backup` - Skip backup prompt
-
-## 🔄 Bidirectional Config Sync
-
-### Forward: Install to Home (`cli.sh`)
-
-Copy configurations from this repository to your home directory (`~/.claude/`, `~/.config/opencode/`, etc.):
-
-```bash
-./cli.sh [--dry-run] [--backup] [--no-backup]
-```
-
-### Reverse: Generate from Home (`generate.sh`)
-
-Export your current configurations back to this repository for version control:
-
-```bash
-./generate.sh [--dry-run]
-```
-
-> **Tip:** Use `generate.sh` after customizing your local setup to save changes back to this repo.
-
-## 🪟 Windows Installation
-
-The installer supports Windows via PowerShell or Git Bash.
-
-### Prerequisites for Windows
-
-1. **Git for Windows** - Includes Git Bash (required for running shell scripts)
-   - Download from: https://git-scm.com/download/win
-   - During installation, choose "Use Git and optional Unix tools from the Command Prompt" to add Git Bash to PATH
-
-2. **jq** (JSON processor) - Auto-installed via winget if available
-   - Manual install: `winget install -e --id jqlang.jq`
-
-### Option 1: PowerShell (Recommended for Windows)
-
-```powershell
-# Run directly from the published URL
-irm https://ai-tools.itman.fyi/install.ps1 | iex
-
-# To pass options, download first, then run the local file:
-irm https://ai-tools.itman.fyi/install.ps1 -OutFile install.ps1
-.\install.ps1 -DryRun
-```
-
-**Local execution:**
-
-```powershell
-# Clone and run locally
-git clone https://github.com/jellydn/my-ai-tools.git
-cd my-ai-tools
-.\install.ps1
-```
-
-### Option 2: Git Bash
-
-```bash
-# Open Git Bash (from right-click menu or Start menu)
-git clone https://github.com/jellydn/my-ai-tools.git
-cd my-ai-tools
-bash ./cli.sh
-```
-
-> **Note:** If `bash` is not recognized in PowerShell, add Git to your PATH:
->
-> ```powershell
-> [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Git\bin", "User")
-> ```
 
 ---
 
-Primary AI coding assistant with extensive customization.
+## 🧙‍♂️ How the Setup Wizard Works
 
-### Installation
+When you run the installer, it walks you through a three-step process:
 
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
+### Step 1 — Select Components
+
+```
+Select components to install (e.g., 1,2,5 or 'all'):
+1) Claude Code (CLI)
+2) Gemini CLI
+3) OpenCode (TUI/CLI)
+4) OpenAI Codex CLI
+5) Shared MCP Hub (V5 Infrastructure)
+6) Common MCP Backends (fff-mcp, qmd, context7)
+7) Global Tooling (biome, ruff, jq, etc.)
+all) Install everything
+
+Selection: 1,2,5
 ```
 
-### MCP Servers Setup
+### Step 2 — Configure Each Selected Tool
 
-#### Automatic Setup (Recommended)
+For each AI tool you selected, the wizard asks:
 
-Run the setup script to configure MCP servers:
+```
+--- Tool Configuration Wizard ---
 
-```bash
-./cli.sh
+Configuring Claude:
+  Select MCP Connection:
+    1) Use Shared Hub (Recommended - Connects to local Hub)
+    2) Standalone (Direct connections, no Hub)
+  Choice [1]:
+
+  Available Skills in kit:
+    [ adr, prd, pr-review, tdd, handoffs, ... ]
+  Select Skills to install by name (e.g. 'pr-review, tdd'), 'all', or 'none':
+  Skills [all]:
+
+  Apply this configuration to all other selected tools? (y/N): y
 ```
 
-The script will prompt you to install each MCP server:
+### Step 3 — Permanent Installation
 
-- [`context7`](https://github.com/upstash/context7) - Documentation lookup for any library
-- [`sequential-thinking`](https://mcp.so/server/sequentialthinking) - Multi-step reasoning for complex analysis
-- [`qmd`](https://github.com/tobi/qmd) - Quick Markdown Search with AI-powered knowledge management
-- [`fff`](https://github.com/dmtrKovalenko/fff.nvim) - Fast file search with built-in memory for AI agents
+Everything gets permanently installed onto your machine:
 
-#### Manual Setup
+| Component | Machine Location |
+|---|---|
+| Claude Code config | `~/.claude/` |
+| Gemini CLI config | `~/.gemini/` |
+| OpenCode config | `~/.config/opencode/` |
+| Codex config | `~/.codex/` |
+| Shared MCP Hub | `~/.ai-tools/shared-mcp/` |
+| Skills | `~/.claude/skills/`, `~/.gemini/skills/`, etc. |
+| Best practices | `~/.ai-tools/best-practices.md` |
 
-##### For Claude Desktop
+> The cloned repository (or `/tmp/` bootstrap folder) is deleted automatically after installation. **Nothing is tied to the source folder.**
 
-Add to [`~/.claude/mcp-servers.json`](configs/claude/mcp-servers.json):
+---
+
+## 🔗 Shared MCP Hub (V5) Architecture
+
+Instead of each AI tool connecting to MCP servers individually, this kit uses a central **Shared Hub** as a single point of connection.
+
+```
+Claude Code  ──┐
+Gemini CLI   ──┤──▶  Shared Hub (port 5115)  ──▶  context7
+OpenCode     ──┤         bridge.ts                  fff-mcp
+Codex CLI    ──┘       multiplexer.ts               qmd
+                                                    sequential-thinking
+```
+
+**How it works:**
+- Claude Code and Codex connect via **STDIO Bridge** (`bridge.ts`)
+- Gemini CLI and OpenCode connect via **Streamable HTTP** (`http://localhost:5115/hub`)
+- The hub is installed to `~/.ai-tools/shared-mcp/` and runs as a background service via `bun`
+
+**Adding a new MCP server:**
+
+Edit `configs/shared-mcp/server-registry.json` and add:
 
 ```json
-{
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    },
-    "fff": {
-      "type": "stdio",
-      "command": "fff-mcp",
-      "args": []
-    }
-  }
+"my-new-server": {
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@my-org/my-mcp-server"],
+  "enabled": true
 }
 ```
 
-##### For Claude Code
+All connected tools will automatically inherit the new server. No client reconfiguration needed.
 
-Use the CLI (installed globally for all projects):
+---
+
+## 🧩 Skills
+
+Skills are per-tool instruction sets stored as `SKILL.md` files that extend an AI tool's capabilities.
+
+### Available Skills (Built-in)
+
+| Skill | Description |
+|---|---|
+| `prd` | Generate Product Requirements Documents |
+| `ralph` | Convert PRDs to JSON for agent execution |
+| `qmd-knowledge` | Project knowledge management |
+| `codemap` | Parallel codebase analysis |
+| `adr` | Architecture Decision Records |
+| `handoffs` | Create session handoff notes (`/handoffs`) |
+| `pickup` | Resume from previous handoff (`/pickup`) |
+| `pr-review` | Automated Pull Request reviews |
+| `slop` | Detect and remove AI-generated boilerplate |
+| `tdd` | Test-Driven Development workflows |
+
+### Adding a New Skill
+
+1. Create a folder: `skills/my-skill/`
+2. Add a `SKILL.md` file with a `compatibility:` header:
+
+```markdown
+compatibility: claude, gemini, opencode, codex
+
+# My Skill
+Instructions for the AI go here...
+```
+
+3. Run `./cli.sh` — the wizard will discover and offer your new skill automatically.
+
+### Community Skills
+
+Install additional skills from popular community repositories:
 
 ```bash
-claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest
-claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking
-claude mcp add --scope user --transport stdio qmd -- qmd mcp
-# Install fff-mcp binary first, then register it
-curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
-claude mcp add --scope user --transport stdio fff -- fff-mcp
-```
-
-##### For OpenCode
-
-The `fff` MCP is already included in [`configs/opencode/opencode.json`](configs/opencode/opencode.json). For manual setup, add to `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "mcp": {
-    "fff": {
-      "type": "local",
-      "command": ["fff-mcp"],
-      "enabled": true
-    }
-  }
-}
-```
-
-##### For Codex
-
-The `fff` MCP is already included in [`configs/codex/config.toml`](configs/codex/config.toml). For manual setup, add to `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.fff]
-command = "fff-mcp"
-args = []
-```
-
-> **MCP Scopes:**
->
-> - `--scope user` (global): Available across all projects
-> - `--scope local` (default): Only in current project directory
-> - `--scope project`: Stored in `.mcp.json` for team sharing
-
-#### Managing MCP Servers
-
-```bash
-# List all configured servers
-claude mcp list
-
-# Remove an MCP server
-claude mcp remove context7
-
-# Get details for a specific server
-claude mcp get qmd
-```
-
-#### Knowledge Management
-
-Replace deprecated `claude-mem` with **qmd-based knowledge system**:
-
-- Project-specific knowledge bases in `~/.ai-knowledges/`
-- AI-powered search via qmd MCP server
-- No repository pollution
-- See [qmd Knowledge Management Guide](docs/qmd-knowledge-management.md)
-
-### Skills
-
-Claude Code uses a "skills" architecture to extend its capabilities. Skills are specialized "playbooks" (instructions, templates, and context) defined in `SKILL.md` files.
-
-#### Installation
-
-The setup script (`./cli.sh`) installs community skills from this repository to your global configuration.
-
-**Automated installation:**
-
-```bash
-./cli.sh
-```
-
-**Manual installation (Remote):**
-
-```bash
-# Install all skills at once using npx skills add
-npx skills add local --yes --global --agent claude-code
-
-# Or install interactively (select which skills to install)
-npx skills add local --global --agent claude-code
-```
-
-#### Available Skills
-
-| Skill           | Description                         |
-| --------------- | ----------------------------------- |
-| `prd`           | Product Requirements Documents      |
-| `ralph`         | PRD to JSON converter               |
-| `qmd-knowledge` | Project knowledge management        |
-| `codemap`       | Parallel codebase analysis          |
-| `adr`           | Architecture Decision Records       |
-| `handoffs`      | Session handoff notes               |
-| `pickup`        | Resume previous context             |
-| `pr-review`     | Automated Pull Request reviews      |
-| `slop`          | AI slop/redundancy remover          |
-| `tdd`           | Test-Driven Development workflows    |
-
-#### Key Skills
-
-**`codemap`** - Orchestrates parallel codebase analysis producing structured documentation in `.planning/codebase/`.
-
-**`qmd-knowledge`** - Project-specific knowledge management ([guide](docs/qmd-knowledge-management.md)).
-
-**`prd`** - Generate Product Requirements Documents.
-
-**`ralph`** - Convert PRDs to JSON for autonomous agent execution.
-
-### Hooks & Status Line
-
-Configure in [`~/.claude/settings.json`](configs/claude/settings.json):
-
-#### PostToolUse Hooks
-
-Auto-format after file edits:
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(ts|tsx|js|jsx)$'; then biome check --write \"$file_path\"; fi; }"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.go$ ]]; then gofmt -w \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.(md|mdx)$'; then npx prettier --write \"$file_path\"; fi; }"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.py$ ]]; then ruff format \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.rs$ ]]; then rustfmt \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.sh$ ]]; then shfmt -w \"$( jq -r .tool_input.file_path )\"; fi"
-          },
-          {
-            "type": "command",
-            "command": "if [[ \"$( jq -r .tool_input.file_path )\" =~ \\.lua$ ]]; then stylua \"$( jq -r .tool_input.file_path )\"; fi"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Supported Formatters:**
-
-- **biome** - TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`) - includes linting
-- **gofmt** - Go files (`.go`)
-- **prettier** - Markdown files (`.md`, `.mdx`)
-- **ruff** - Python files (`.py`) - modern, fast formatter
-- **rustfmt** - Rust files (`.rs`)
-- **shfmt** - Shell scripts (`.sh`)
-- **stylua** - Lua files (`.lua`)
-
-**Installation:** The setup script (`./cli.sh`) automatically checks and installs these tools with mise priority:
-
-- `jq` - JSON parsing (required)
-- `biome` - JavaScript/TypeScript formatting
-- `gofmt` - Go formatting (requires Go installation)
-- `prettier` - Markdown formatting (used via `npx`)
-- `ruff` - Python formatting (installed via mise, pipx, or pip)
-- `rustfmt` - Rust formatting (installed via mise or rustup)
-- `shfmt` - Shell script formatting (installed via mise, brew, or go install)
-- `stylua` - Lua formatting (installed via mise, brew, or cargo)
-
-#### PreToolUse Hooks
-
-##### Git Guard Hook
-
-Prevents dangerous git commands from being executed:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun ~/.claude/hooks/index.ts PreToolUse"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Blocked commands:**
-
-- `git push --force` / `-f` (without lease protection)
-- `git reset --hard` (destroys uncommitted changes)
-- `git clean -fd` (removes untracked files)
-- `git branch -D` (force delete branch)
-- `git rebase -i` (interactive rebase)
-- `git checkout --force` / `-f` (force checkout)
-- `git stash drop/clear` (removes stashes)
-- And more...
-
-The implementation can be found in `configs/claude/hooks/index.ts` and `configs/claude/hooks/git-guard.ts`.
-
-      }
-    ]
-  }
-}
-```
-
-#### Status Line
-
-Using claude-hud plugin:
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "bash -c 'node \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
-  }
-}
-```
-
-<img width="1058" height="138" alt="Claude HUD Status Line" src="https://github.com/user-attachments/assets/afab87bb-d78f-4cc8-9e1b-f3948a7e6fe6" />
-
-> **Tip:** Auto-compact is disabled. Use `claude-hud` to monitor context usage.
-
-### Custom Commands, Agents & Skills
-
-#### Custom Commands
-
-Located in [`configs/claude/commands/`](configs/claude/commands/):
-
-- `/plannotator-review` - Interactive code review
-- `/ultrathink` - Deep thinking mode
-
-#### Custom Agents
-
-Located in [`configs/claude/agents/`](configs/claude/agents/):
-
-- `ai-slop-remover` - Remove AI-generated boilerplate and improve code quality
-- `code-reviewer` - Comprehensive code quality and security review
-- `test-generator` - Generate meaningful tests with edge case coverage
-- `documentation-writer` - Create clear, helpful documentation
-- `feature-team-coordinator` - Coordinate specialized agents for complex workflows
-
-📖 **[Agent Teams Guide](docs/claude-code-teams.md)** - Learn how to use Agent Teams to coordinate multiple specialized agents for complex tasks like feature development, code review, and documentation.
-
-#### Skills
-
-**Local Marketplace Plugins** - Installed by `cli.sh` from [`skills/`](skills/):
-
-- `adr` - Architecture Decision Records
-- `codemap` - Parallel codebase analysis producing structured documentation
-- `handoffs` - Create handoff plans for continuing work (provides `/handoffs` command)
-- `pickup` - Resume work from previous handoff sessions (provides `/pickup` command)
-- `pr-review` - Pull request review workflows
-- `prd` - Generate Product Requirements Documents
-- `qmd-knowledge` - Project knowledge management
-- `ralph` - Convert PRDs to JSON for autonomous agent execution
-- `slop` - AI slop detection and removal
-- `tdd` - Test-Driven Development workflows
-
-#### Projects Built with AI
-
-Real-world projects built using these AI tools:
-
-| Project                                                             | Description                                                                     | Tools Used                                  |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
-| - [Oak](https://github.com/jellydn/oak)                             | Lightweight macOS focus companion for deep work with notch-first UI             | Ralph + OpenCode + Codex GPT 5.2            |
-| - [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback                | Ralph + OpenCode + GLM + Codex (review)     |
-| - [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts                                  | Claude + spec-kit                           |
-| - [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review                                    | Ralph + OpenCode                            |
-| - [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development                             | TypeScript                                  |
-| - [AI Launcher](https://github.com/jellydn/ai-launcher)             | Fast launcher for switching between AI coding assistants                        | TypeScript                                  |
-| - [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity                                      | TypeScript                                  |
-| - [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects                           | Go + Bubble Tea                             |
-| - [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files                         | Lua + Neovim                                |
-| - [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                                        | Lua + Neovim                                |
-| - [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                                        | OpenCode + GLM 4.7 + Codex CLI              |
-| - [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server             | Ralph + OpenCode                            |
-| - [Little Writing](https://github.com/jellydn/little-writing)       | A handwriting tracing app for kids built with React, react-konva, and Capacitor | Claude + spec-kit + GLM 5                   |
-
-📖 **[Learning Stories](docs/learning-stories.md)** - Detailed notes on development approaches, key takeaways, and tools I've tried.
-
-#### Recommended Community Skills
-
-Official and community-maintained skill collections for specific frameworks:
-
-| Framework            | Skills Repository                                                                                             | Description                                                                                                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **UI/UX Design**     | [Interface Design](https://interface-design.dev/)                                                             | Comprehensive guide to interface design patterns and best practices for anyone working with UI/UX development.                                                             |
-| **Expo**             | [expo/skills](https://github.com/expo/skills)                                                                 | Official Expo skills for React Native development. Includes app creation, building, debugging, EAS updates, and config management workflows.                               |
-| **Next.js**          | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)                                       | Vercel's agent skills for Next.js and React development. Includes project creation, component generation, and deployment workflows.                                        |
-| **Andrej Karpathy**  | [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)                 | Community skills inspired by Andrej Karpathy's coding principles and practices for AI-focused development workflows.                                                       |
-| **Humanizer**        | [blader/humanizer](https://github.com/blader/humanizer)                                                       | Removes signs of AI-generated writing from text. Based on Wikipedia's AI writing detection guide, it detects 24 patterns to make text sound more natural and human.        |
-| **Claude Skills**    | [jezweb/claude-skills](https://github.com/jezweb/claude-skills)                                               | 97 production-ready skills for Claude Code CLI including Cloudflare, React, AI integrations, and more. Includes context-mate for project analysis and workflow management. |
-| **Skills Discovery** | [vercel-labs/skills/find-skills](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | Skill discovery helper. Search and install skills from skills.sh when users ask about capabilities. Uses `npx skills find [query]`.                                        |
-| **Matt Pocock**      | [mattpocock/skills](https://github.com/mattpocock/skills)                                                     | Community skills by Matt Pocock. Includes `grill-me` for stress-testing plans via relentless Q&A, and more workflow-enhancing skills for AI-assisted development.          |
-
-**Installation:**
-
-```bash
-# Install skills using npx skills add
 npx skills add expo/skills --global --agent claude-code
 npx skills add vercel-labs/agent-skills --global --agent claude-code
 npx skills add blader/humanizer --global --agent claude-code
@@ -537,405 +193,126 @@ npx skills add jezweb/claude-skills --global --agent claude-code
 npx skills add mattpocock/skills --skill grill-me --global --agent claude-code
 ```
 
-### Configuration Files
+---
 
-All configuration files are located in the [`configs/claude/`](configs/claude/) directory:
+## 🛠️ Tool Reference
 
-- [`settings.json`](configs/claude/settings.json) - Main Claude Code settings
-- [`mcp-servers.json`](configs/claude/mcp-servers.json) - MCP server configurations
-- [`commands/`](configs/claude/commands/) - Custom slash commands
-- [`agents/`](configs/claude/agents/) - Custom agent definitions
+### Claude Code
 
-Local marketplace plugins are in [`skills/`](skills/).
+Primary AI coding assistant by Anthropic.
 
-#### Tips & Tricks
+**Config location:** `~/.claude/claude.json`
 
-- **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
-- **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
-- **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
+**Key features configured:**
+- OpusPlan mode (plans with Opus, implements with Sonnet)
+- Auto-formatting hooks (biome, gofmt, ruff, rustfmt, shfmt, stylua)
+- Git Guard hook (blocks dangerous git commands)
+- Custom agents: `code-reviewer`, `test-generator`, `docs-writer`, `ai-slop-remover`
+- Custom commands: `/ultrathink`, `/plannotator-review`
+
+**MCP:** Connected via Shared Hub Bridge (STDIO)
 
 ---
 
-## 🎨 OpenCode (Optional)
+### Gemini CLI
 
-OpenAI-powered AI coding assistant. [Homepage](https://opencode.ai)
+Google's terminal AI agent powered by Gemini 2.5.
 
-<details>
-<summary><strong>Installation & Configuration</strong></summary>
+**Config location:** `~/.gemini/settings.json`
 
-### Installation
+**Key features:**
+- Free tier: 60 req/min, 1000 req/day
+- 1M token context window
+- Google Search grounding built-in
+
+**MCP:** Connected via Hub HTTP endpoint (`http://localhost:5115/hub`)
+
+```bash
+# Authenticate
+gemini  # Follow OAuth browser flow
+# Or use API key
+export GEMINI_API_KEY="your-key"
+```
+
+---
+
+### OpenCode
+
+Modern TUI-based coding assistant. [Homepage](https://opencode.ai)
+
+**Config location:** `~/.config/opencode/opencode.json`
+
+**Key features:**
+- Auto-formatting via built-in `formatter` config
+- Plugins: `@plannotator/opencode`, `@mohak34/opencode-notifier`
+- Custom agents & commands
+
+**MCP:** Connected via Hub HTTP endpoint (`http://localhost:5115/hub`)
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash
 ```
 
-### Configuration
-
-Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.config/opencode/`:
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
-  "theme": "kanagawa",
-  "default_agent": "plan",
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true
-    },
-    "qmd": {
-      "type": "local",
-      "command": ["qmd", "mcp"],
-      "enabled": true
-    }
-  },
-  "agent": {
-    "build": {
-      "permission": {
-        "bash": {
-          "git push": "ask",
-          "qmd": "allow",
-          "qmd query": "allow",
-          "qmd get": "allow",
-          "qmd search": "allow",
-          "$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh": "allow",
-          "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
-        }
-      }
-    }
-  },
-  "plugin": [
-    "@plannotator/opencode@latest",
-    "@mohak34/opencode-notifier@latest"
-  ],
-  "formatter": {
-    "biome": {
-      "command": ["biome", "check", "--write", "$FILE"],
-      "extensions": [".ts", ".tsx", ".js", ".jsx"]
-    },
-    "gofmt": {
-      "command": ["gofmt", "-w", "$FILE"],
-      "extensions": [".go"]
-    },
-    "prettier": {
-      "command": ["npx", "prettier", "--write", "$FILE"],
-      "extensions": [".md", ".mdx"]
-    },
-    "ruff": {
-      "command": ["ruff", "format", "$FILE"],
-      "extensions": [".py"]
-    },
-    "rustfmt": {
-      "command": ["rustfmt", "$FILE"],
-      "extensions": [".rs"]
-    },
-    "shfmt": {
-      "command": ["shfmt", "-w", "$FILE"],
-      "extensions": [".sh"]
-    },
-    "stylua": {
-      "command": ["stylua", "$FILE"],
-      "extensions": [".lua"]
-    }
-  }
-}
-```
-
-**Formatters**: OpenCode automatically formats code after edits using:
-
-- **biome** for TypeScript/JavaScript files (`.ts`, `.tsx`, `.js`, `.jsx`)
-- **gofmt** for Go files (`.go`)
-- **prettier** for Markdown files (`.md`, `.mdx`)
-- **ruff** for Python files (`.py`)
-- **rustfmt** for Rust files (`.rs`)
-- **shfmt** for shell scripts (`.sh`)
-- **stylua** for Lua files (`.lua`)
-
-Similar to Claude Code's PostToolUse hooks, formatters run automatically after write/edit operations.
-
-### Plugins
-
-OpenCode supports community plugins that enhance functionality:
-
-- **[@plannotator/opencode](https://github.com/backnotprop/plannotator)** - Interactive code planning and annotation
-- **[@mohak34/opencode-notifier](https://github.com/mohak34/opencode-notifier)** - Sound and system notifications for events (permission requests, completion, errors, questions)
-
-Plugins are automatically installed on next OpenCode launch. Configure notification behavior via `~/.config/opencode/opencode-notifier.json` if desired.
-
-### Custom Agents
-
-Located in [`configs/opencode/agent/`](configs/opencode/agent/):
-
-- `ai-slop-remover` - Remove AI-generated boilerplate
-- `docs-writer` - Generate documentation
-- `review` - Code review
-- `security-audit` - Security auditing
-
-### Custom Commands
-
-Located in [`configs/opencode/command/`](configs/opencode/command/):
-
-- `plannotator-review` - Interactive code review
-- `simplify` - Simplify over-engineered code for clarity and maintainability
-- `batch` - Run multiple tasks in parallel as worker tasks
-
-</details>
-
 ---
 
-## 🤖 OpenAI Codex CLI (Optional)
+### Codex CLI
 
-OpenAI's command-line coding assistant. [Homepage](https://developers.openai.com/codex/cli)
+OpenAI's command-line coding assistant.
 
-<details>
-<summary><strong>Installation & Configuration</strong></summary>
+**Config location:** `~/.codex/config.toml`
 
-### Installation
+**Key features:**
+- TOML-based configuration (automatically managed by installer)
+- Kanagawa theme
+- Multi-agent support
+
+**MCP:** Shared Hub injected dynamically into `config.toml` during install
 
 ```bash
 pnpm install -g @openai/codex
 ```
 
-### Configuration
+---
 
-Located in [`configs/codex/`](configs/codex/):
+## 🔄 Bidirectional Config Sync
 
-- [`config.json`](configs/codex/config.json) - Main configuration
-- [`config.toml`](configs/codex/config.toml) - Alternative TOML format
-- [`AGENTS.md`](configs/codex/AGENTS.md) - Agent guidelines
+### Forward: Install to Machine (`cli.sh`)
 
-### Usage
+Copy configurations from this repository to your home directory:
 
 ```bash
-# Start Codex CLI
-codex
-
-# Use with Ollama (local models)
-codex --oss
-
-# Use with a specific task
-codex "Explain this code"
+./cli.sh [--dry-run] [--backup] [--no-backup]
 ```
 
-</details>
+### Reverse: Export from Machine (`generate.sh`)
+
+Export your current configurations back to this repository for version control:
+
+```bash
+./generate.sh [--dry-run]
+```
+
+> Use `generate.sh` after customizing your local setup to save changes back to the repo. Commit and push to keep your setup portable.
 
 ---
 
-## 🔷 Google Gemini CLI (Optional)
+## 📋 Prerequisites
 
-Google's AI agent that brings the power of Gemini directly into your terminal. [Homepage](https://github.com/google-gemini/gemini-cli)
+| Requirement | Notes |
+|---|---|
+| **Git** | Required for cloning/updates |
+| **Bun** | Auto-installed if missing |
+| **curl** | Required for one-line installer |
 
-<details>
-<summary><strong>Installation & Configuration</strong></summary>
-
-### Installation
-
-```bash
-pnpm install -g @google/gemini-cli
-```
-
-Or using Homebrew (macOS/Linux):
-
-```bash
-brew install gemini-cli
-```
-
-### Authentication
-
-Gemini CLI supports multiple authentication methods:
-
-**Option 1: Login with Google (OAuth)**
-
-```bash
-gemini
-# Follow the browser authentication flow
-```
-
-**Option 2: Gemini API Key**
-
-```bash
-export GEMINI_API_KEY="YOUR_API_KEY"
-gemini
-```
-
-Get your API key from [Google AI Studio](https://aistudio.google.com/apikey).
-
-### Configuration
-
-Located in [`configs/gemini/`](configs/gemini/):
-
-- [`settings.json`](configs/gemini/settings.json) - Main configuration with MCP servers and experimental features
-- [`GEMINI.md`](configs/gemini/GEMINI.md) - Agent guidelines
-- [`AGENTS.md`](configs/gemini/AGENTS.md) - Additional agent guidelines
-- [`agents/`](configs/gemini/agents/) - Custom agent definitions (`.md` format with YAML frontmatter)
-  - `ai-slop-remover.md` - Clean up AI-generated code patterns
-  - `docs-writer.md` - Generate comprehensive documentation
-  - `review.md` - Code review with best practices
-  - `security-audit.md` - Security vulnerability assessment
-- [`commands/`](configs/gemini/commands/) - Custom slash commands (`.toml` format)
-  - `ultrathink.toml` - Deep thinking mode
-
-### Key Features
-
-- 🆓 **Free tier**: 60 requests/min and 1,000 requests/day with personal Google account
-- 🧠 **Powerful models**: Access to Gemini 2.5 Flash and Pro with 1M token context window
-- 🔧 **Built-in tools**: Google Search grounding, file operations, shell commands
-- 🔌 **MCP support**: Extensible via Model Context Protocol
-- 💻 **Terminal-first**: Designed for command-line developers
-
-### Usage
-
-```bash
-# Start Gemini CLI
-gemini
-
-# Include multiple directories
-gemini --include-directories ../lib,../docs
-
-# Use specific model
-gemini -m gemini-2.5-flash
-
-# Non-interactive mode for scripts
-gemini -p "Explain the architecture of this codebase"
-```
-
-### Custom Commands
-
-Custom commands are stored in `~/.gemini/commands/` as TOML files. Example:
-
-```bash
-# Run the ultrathink command
-/ultrathink What is the best approach to optimize this database query?
-```
-
-### MCP Servers
-
-Configure MCP servers in `~/.gemini/settings.json` to extend functionality:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    }
-  },
-  "experimental": {
-    "enableAgents": true
-  }
-}
-```
-
-> **Note:** Custom agents in `~/.gemini/agents/` are automatically discovered when `experimental.enableAgents` is set to `true`.
-
-</details>
+> The installer automatically checks for and installs `bun`, `qmd`, and `fff-mcp` if not found.
 
 ---
 
-## 🛠️ Companion Tools
+## 📚 Resources
 
-<details>
-<summary><strong>Additional Tools & Integrations</strong></summary>
-
-### Plannotator
-
-[**Plannotator**](https://plannotator.ai/) - Annotate plans outside the terminal for better collaboration. ([GitHub](https://github.com/backnotprop/plannotator))
-
-### Claude-Mem
-
-⚠️ **DEPRECATED** - Use [qmd Knowledge Management](docs/qmd-knowledge-management.md) instead.
-
-### qmd Knowledge Skill
-
-**qmd Knowledge Skill** is an experimental memory/context management system:
-
-- No repository pollution (external storage)
-- AI-powered semantic search
-- Multi-project support
-- Simple & reliable
-
-See [GitHub Issue #11](https://github.com/jellydn/my-ai-tools/issues/11) for details.
-
-### Claude HUD
-
-[**Claude HUD**](https://github.com/jarrodwatts/claude-hud) - Status line monitoring for context usage, tools, agents, and todos.
-
-```bash
-# Inside Claude Code
-/claude-hud:setup
-```
-
-### Try
-
-[**Try**](https://github.com/tobi/try) - Fresh directories for every vibe. ([Interactive Demo](https://asciinema.org/a/ve8AXBaPhkKz40YbqPTlVjqgs))
-
-### Claude Squad
-
-[**Claude Squad**](https://github.com/smtg-ai/claude-squad) - Manage multiple AI agents in separate workspaces with isolated git worktrees.
-
-### cmux
-
-[**cmux**](https://github.com/manaflow-ai/cmux) - Ghostty-based macOS terminal with vertical tabs and notifications for AI coding agents.
-
-### Spec Kit
-
-[**Spec Kit**](https://github.com/github/spec-kit) - Toolkit for Spec-Driven Development. ([GitHub](https://github.com/github/spec-kit))
-
-### Backlog.md
-
-[**Backlog.md**](https://github.com/MrLesk/Backlog.md) - Markdown-native task manager and Kanban visualizer. ([npm](https://www.npmjs.com/package/backlog.md))
-
-### Agent Browser
-
-[**agent-browser**](https://github.com/vercel-labs/agent-browser) - Headless browser automation CLI for AI agents.
-
-```bash
-npx skills add vercel-labs/agent-browser
-```
-
-### Dev Browser
-
-[**Dev Browser**](https://github.com/SawyerHood/dev-browser) - Browser automation plugin with persistent page state for Claude Code.
-
-```bash
-/plugin marketplace add sawyerhood/dev-browser
-/plugin install dev-browser@sawyerhood/dev-browser
-```
-
-</details>
-
----
-
-## 📚 Best Practices
-
-Setup includes [`configs/best-practices.md`](configs/best-practices.md) with comprehensive software development guidelines:
-
-- Kent Beck's "Tidy First?" principles
-- Kent C. Dodds' programming wisdom
-- Testing Trophy approach
-- Performance optimization patterns
-
-Copy the file to your preferred location and reference it in your AI tools.
-
----
-
-## 📖 Resources
-
-- [Claude Code Documentation](https://claude.com/claude-code) - Official docs
-- [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
-- [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
-- [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples
-- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs
-- [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice) - Best practices and tips for Claude Code
-- [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
-- [Llama.cpp Setup with Claude/Codex CLI](https://tammam.io/blog/llama-cpp-setup-with-claude-codex-cli/) - Local model setup guide
-
+- [Claude Code Documentation](https://claude.com/claude-code)
+- [OpenCode Documentation](https://opencode.ai/docs)
+- [MCP Servers Directory](https://mcp.so)
+- [MCP SDK Reference](https://github.com/modelcontextprotocol/typescript-sdk)
+- [Claude Code Best Practices](https://github.com/shanraisshan/claude-code-best-practice)
+- [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)
