@@ -1270,6 +1270,31 @@ copy_codex_configs() {
 			log_success "Backed up existing config.toml to config.toml.bak"
 		fi
 		execute_quoted cp "$SCRIPT_DIR/configs/codex/config.toml" "$HOME/.codex/"
+		
+		# If user selected Shared Hub, forcefully rewrite the MCP configuration dynamically.
+		if [ "$CONFIG_CODEX_MCP" = "1" ] || [[ -z "$CONFIG_CODEX_MCP" && "$INSTALL_HUB" = true ]]; then
+			log_info "Configuring Codex to use Shared Hub..."
+			# Using shell execution to strip existing [mcp_servers.*] blocks
+			if [ "$DRY_RUN" = true ]; then
+				log_info "[DRY RUN] Would rewrite $HOME/.codex/config.toml to remove standalone servers and inject shared-hub"
+			else
+				awk '
+				/^\[mcp_servers\./ {skip=1; next}
+				/^\[/ && !/^\[mcp_servers\./ {skip=0}
+				!skip {print}
+				' "$HOME/.codex/config.toml" > "$HOME/.codex/config.toml.tmp"
+				
+				# Inject the dynamically computed project bridge path
+				cat <<EOF >> "$HOME/.codex/config.toml.tmp"
+
+[mcp_servers.shared-hub]
+command = "bun"
+args = ["run", "$HOME/.ai-tools/shared-mcp/bridge.ts"]
+EOF
+				mv "$HOME/.codex/config.toml.tmp" "$HOME/.codex/config.toml"
+			fi
+			log_success "Codex MCP configured for Shared Hub"
+		fi
 	fi
 
 	if [ -d "$SCRIPT_DIR/configs/codex/themes" ]; then
@@ -1669,6 +1694,18 @@ copy_skill_to_targets() {
 		fi
 	else
 		log_info "Skipped $skill_name for Gemini CLI (not compatible)"
+	fi
+
+	if skill_is_compatible_with "$skill_dir" "codex"; then
+		if [[ "$CONFIG_CODEX_SKILLS" == "all" ]] || [[ ",$CONFIG_CODEX_SKILLS," == *",$skill_name,"* ]]; then
+			safe_copy_dir "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
+			execute_quoted touch "$CODEX_SKILLS_DIR/$skill_name/$managed_marker"
+			log_success "Copied $skill_name to Codex CLI"
+		else
+			log_info "Skipped $skill_name for Codex CLI (user deselected)"
+		fi
+	else
+		log_info "Skipped $skill_name for Codex CLI (not compatible)"
 	fi
 }
 

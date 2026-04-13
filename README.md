@@ -2,8 +2,6 @@
 
 > **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, Gemini CLI, OpenCode, and Codex with custom configurations, MCP servers, skills, and commands.
 
-📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
-
 ## ✨ Features
 
 - 🚀 **One-line installer** - Get started in seconds
@@ -14,12 +12,6 @@
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
 - 🧩 **Skills architecture** - Reusable playbooks and automated workflows
 - 🛡️ **Git Guard Hook** - Prevents dangerous git commands (force push, hard reset, etc.)
-
-## 🎬 Demo
-
-[![IT Man Channel](https://img.shields.io/badge/YouTube-IT%20Man%20Channel-red?logo=youtube)](https://github.com/jellydn/itman-channel)
-
-[![IT Man - My AI Setup in 2026](https://i.ytimg.com/vi/ESudSFAyuuw/mqdefault.jpg)](https://www.youtube.com/watch?v=ESudSFAyuuw)
 
 ## 📋 Prerequisites
 
@@ -41,18 +33,23 @@
 
 ### One-Line Installer (Recommended)
 
-Install directly without cloning the repository:
+Install directly from GitHub without cloning the repository:
 
 ```bash
-curl -fsSL https://ai-tools.itman.fyi/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main/install.sh | bash
 ```
 
 > **Security Note:** Review the script before running:
 >
 > ```bash
-> curl -fsSL https://ai-tools.itman.fyi/install.sh -o install.sh
+> curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main/install.sh -o install.sh
 > cat install.sh  # Review the script
 > bash install.sh
+> ```
+
+> **GitHub Pages Alternative:** If you enable GitHub Pages for this repo, you can also use:
+> ```bash
+> curl -fsSL https://dinesh-nimmagadda3.github.io/my-ai-tools/install.sh | bash
 > ```
 
 **Options:**
@@ -942,30 +939,3 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Why I switched to Claude Code 2.0](https://blog.silennai.com/claude-code)
 - [Llama.cpp Setup with Claude/Codex CLI](https://tammam.io/blog/llama-cpp-setup-with-claude-codex-cli/) - Local model setup guide
 
----
-
-## 👤 Author
-
-**Dung Huynh**
-
-- Website: [productsway.com](https://productsway.com)
-- YouTube: [IT Man Channel](https://www.youtube.com/@it-man)
-- GitHub: [@jellydn](https://github.com/jellydn)
-
----
-
-## ⭐ Show your support
-
-Give a ⭐️ if this project helped you!
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/dunghd)
-
----
-
-## 📝 Contributing
-
-Contributions, issues and feature requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
-
----
-
-Made with ❤️ by [Dung Huynh](https://productsway.com)

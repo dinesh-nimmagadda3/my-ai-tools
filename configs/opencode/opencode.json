@@ -48,11 +48,6 @@
   },
   "instructions": ["~/.ai-tools/best-practices.md", "~/.ai-tools/MEMORY.md"],
   "mcp": {
-    "context7": {
-      "enabled": true,
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp"
-    },
     "hub": {
       "enabled": true,
       "type": "remote",
