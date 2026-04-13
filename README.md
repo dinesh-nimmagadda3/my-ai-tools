@@ -129,9 +129,10 @@ Codex CLI    ──┘       multiplexer.ts            filesystem, devtools (Sys
 ```
 
 **How it works:**
-- **Containerized**: The Hub runs inside a Podman container (`docker.io/oven/bun`) for maximum stability.
+- **Containerized**: The Hub runs inside a Podman container built from `configs/shared-mcp/Dockerfile` so Chrome DevTools MCP has the runtime libraries it needs.
 - **Persistent**: Managed by `systemd` to ensure it starts on boot and auto-restarts on failure.
-- **Standardized**: Uses a standard `docker-compose.yml` for easy management.
+- **Host-integrated**: The container mounts your real home path and host Chrome install so filesystem and browser tools see the same machine state you do.
+- **Standardized**: Uses `configs/shared-mcp/docker-compose.yml` for build and runtime management.
 
 **Management Commands:**
 

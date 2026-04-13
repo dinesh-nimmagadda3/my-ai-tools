@@ -116,6 +116,9 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/HEAD/src/
   "type": "stdio",
   "command": "qmd",
   "args": ["mcp"],
+  "env": {
+    "XDG_CACHE_HOME": "/app/.shared-mcp-data/cache"
+  },
   "shared": true,
   "enabled": true
 }
@@ -161,7 +164,14 @@ qmd mcp --help
 "fff": {
   "type": "stdio",
   "command": "fff-mcp",
-  "args": [],
+  "args": [
+    "--frecency-db",
+    "/app/.shared-mcp-data/fff/frecency.mdb",
+    "--history-db",
+    "/app/.shared-mcp-data/fff/history.mdb",
+    "--log-file",
+    "/app/.shared-mcp-data/fff/fff-mcp.log"
+  ],
   "shared": true,
   "enabled": true
 }
@@ -191,15 +201,15 @@ fff-mcp --help
 |---|---|
 | **Upstream** | [MCP Servers (Memory)](https://github.com/modelcontextprotocol/servers/tree/main/src/memory) |
 | **Package** | `@modelcontextprotocol/server-memory` |
-| **Type** | `stdio` (local, spawned via npx) |
+| **Type** | `stdio` (spawned via Bun) |
 | **Purpose** | Persistent knowledge graph memory — Claude remembers facts about you across chats |
 
 **Registry entry:**
 ```json
 "memory": {
   "type": "stdio",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-memory"],
+  "command": "bun",
+  "args": ["x", "-y", "@modelcontextprotocol/server-memory"],
   "env": {
     "MEMORY_FILE_PATH": "$HOME/.ai-tools/memory.jsonl"
   },
@@ -233,15 +243,16 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 |---|---|
 | **Upstream** | [MCP Servers (Filesystem)](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) |
 | **Package** | `@modelcontextprotocol/server-filesystem` |
-| **Type** | `stdio` (local, spawned via npx) |
+| **Type** | `stdio` (spawned via Bun) |
 | **Purpose** | Secure local filesystem access — read, write, create, and search files/directories |
 
 **Registry entry:**
 ```json
 "filesystem": {
   "type": "stdio",
-  "command": "npx",
+  "command": "bun",
   "args": [
+    "x",
     "-y",
     "@modelcontextprotocol/server-filesystem",
     "$HOME"
@@ -253,6 +264,8 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 
 > [!TIP]
 > Use **`$HOME`** in the path arguments to ensure the server works correctly regardless of the user account.
+
+In the containerized hub deployment, `$HOME` is mounted to the same absolute host path so filesystem tools expose your real home directory instead of `/root`.
 
 **MCP Tools exposed:**
 - `read_text_file` / `read_multiple_files` — Read file contents
@@ -275,18 +288,25 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 |---|---|
 | **Upstream** | https://github.com/ChromeDevTools/chrome-devtools-mcp |
 | **Package** | `chrome-devtools-mcp` |
-| **Type** | `stdio` (local, spawned via npx) |
+| **Type** | `stdio` (spawned via Bun) |
 | **Purpose** | Browser automation and inspection — navigate, interact, and debug web pages |
 
 **Registry entry:**
 ```json
 "chrome-devtools": {
   "type": "stdio",
-  "command": "npx",
+  "command": "bun",
   "args": [
+    "x",
     "-y",
     "chrome-devtools-mcp@latest",
-    "--headless"
+    "--headless",
+    "--executablePath",
+    "/opt/google/chrome/chrome",
+    "--userDataDir",
+    "/app/.shared-mcp-data/chrome-profile",
+    "--chromeArg=--no-sandbox",
+    "--chromeArg=--disable-setuid-sandbox"
   ],
   "shared": true,
   "enabled": true
@@ -301,6 +321,7 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 
 **Capabilities & Limitations:**
 - **Headless Mode**: ✅ Supported via `--headless` flag (enabled in our default config).
+- **Chrome Runtime**: The container mounts the host Chrome install at `/opt/google/chrome` and uses a writable profile under `/app/.shared-mcp-data/chrome-profile`.
 - **Firefox Support**: ❌ Not officially supported. The server is purpose-built for Chromium-based browsers via the Chrome DevTools Protocol (CDP).
 
 **How to verify alignment:**

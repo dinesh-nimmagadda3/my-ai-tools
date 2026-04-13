@@ -11,8 +11,10 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { Request, Response } from "express";
 import fs from "node:fs";
+import path from "node:path";
 import { pino } from "pino";
 import { randomUUID } from "node:crypto";
+import { fileURLToPath } from "node:url";
 
 const logger = pino({
   transport: {
@@ -21,8 +23,29 @@ const logger = pino({
   }
 });
 
-const REGISTRY_PATH = "./server-registry.json";
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
+const REGISTRY_PATH = path.join(MODULE_DIR, "server-registry.json");
 const PORT = Number(process.env.PORT) || 5115;
+
+function resolveCommand(command: string, home: string): string {
+  if (path.isAbsolute(command) || command.includes("/")) {
+    return command;
+  }
+
+  const fallbackDirs = [
+    path.join(home, ".local", "bin"),
+    path.join(home, ".bun", "bin"),
+  ];
+
+  for (const dir of fallbackDirs) {
+    const candidate = path.join(dir, command);
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return command;
+}
 
 interface McpBackend {
   client: Client;
@@ -163,16 +186,23 @@ class McpHubV5 {
     let transport;
     if (config.type === "stdio") {
       const home = process.env.HOME || "";
+      const command = resolveCommand(config.command, home);
       const args = (config.args || []).map((arg: string) => arg.replace("$HOME", home));
       const env = { ...process.env };
+      const bunTmpDir = process.env.BUN_TMPDIR || "/tmp";
+      const bunInstallDir = process.env.BUN_INSTALL || "/tmp";
       if (config.env) {
         for (const [key, value] of Object.entries(config.env)) {
           env[key] = (value as string).replace("$HOME", home);
         }
       }
+      if (config.command === "bun") {
+        env.BUN_TMPDIR = bunTmpDir;
+        env.BUN_INSTALL = bunInstallDir;
+      }
 
       transport = new StdioClientTransport({
-        command: config.command,
+        command,
         args,
         env: env as Record<string, string>
       });
@@ -241,4 +271,3 @@ setInterval(() => {
     memory: process.memoryUsage().rss 
   });
 }, 300_000);
-

@@ -1,19 +1,23 @@
-version: '3.8'
-
 services:
   shared-mcp-hub:
-    image: docker.io/oven/bun:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shared-mcp-hub:local
     container_name: shared-mcp-hub
-    command: bun run /app/configs/shared-mcp/multiplexer.ts
+    working_dir: /app/configs/shared-mcp
+    command: /bin/sh -lc "bun install && bun run multiplexer.ts"
     ports:
       - "5115:5115"
     environment:
       - NODE_ENV=production
       - PORT=5115
-      - HOME=/root
+      - HOME=${HOME}
+      - PATH=${HOME}/.bun/bin:${HOME}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
     volumes:
       - ${PROJECT_DIR}:/app:z
-      - ${HOME}/.ai-tools:/root/.ai-tools:z
+      - ${HOME}:${HOME}
+      - /opt/google/chrome:/opt/google/chrome:ro
     restart: always
     logging:
       driver: json-file

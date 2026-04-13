@@ -948,7 +948,7 @@ install_shared_mcp() {
 }
 
 ensure_hub_running() {
-	local pid_file="/tmp/shared-mcp-hub.pid"
+	local pid_file="$HOME/.ai-tools/shared-mcp/hub.pid"
 	if [ -f "$pid_file" ] && kill -0 $(cat "$pid_file") 2>/dev/null; then
 		# Hub is running, check if it responds
 		if curl -s http://localhost:5115/status >/dev/null 2>&1; then
@@ -984,7 +984,7 @@ mcp-hub() {
 
 			log_info "Starting Shared MCP Hub V5..."
 			if [ "$DRY_RUN" = true ]; then
-				log_info "[DRY RUN] (cd $hub_dir && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
+				log_info "[DRY RUN] (cd $hub_dir && export PATH=\"$hub_path\" BUN_TMPDIR=/tmp BUN_INSTALL=/tmp && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
 				return 0
 			fi
 			# Ensure common paths are available to the Hub
@@ -993,7 +993,7 @@ mcp-hub() {
 			local bun_bin; bun_bin=$(bun pm bin -g 2>/dev/null)
 			[[ -n "$bun_bin" && ":$hub_path:" != *":$bun_bin:"* ]] && hub_path="$bun_bin:$hub_path"
 
-			(cd "$hub_dir" && export PATH="$hub_path" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
+			(cd "$hub_dir" && export PATH="$hub_path" BUN_TMPDIR=/tmp BUN_INSTALL=/tmp && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
 			
 			local count=0
 			local max_retries=15
