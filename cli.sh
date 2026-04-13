@@ -952,6 +952,12 @@ mcp_hub() {
 				log_warning "Shared MCP Hub is already running (PID: $(cat "$pid_file"))"
 				return 0
 			fi
+			if lsof -i :5115 >/dev/null 2>&1; then
+				log_warning "Port 5115 is already in use. Attempting to clear..."
+				fuser -k 5115/tcp 2>/dev/null || true
+				sleep 1
+			fi
+
 			log_info "Starting Shared MCP Hub V5..."
 			if [ "$DRY_RUN" = true ]; then
 				log_info "[DRY RUN] (cd $hub_dir && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
@@ -966,8 +972,8 @@ mcp_hub() {
 			(cd "$hub_dir" && export PATH="$hub_path" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
 			
 			local count=0
-			while [ $count -lt 5 ]; do
-
+			local max_retries=15
+			while [ $count -lt $max_retries ]; do
 				if curl -s http://localhost:5115/status >/dev/null 2>&1; then
 					log_success "Shared MCP Hub V5 ACTIVE on http://localhost:5115"
 					return 0
@@ -976,6 +982,8 @@ mcp_hub() {
 				count=$((count+1))
 			done
 			log_error "Failed to start. Check $log_file"
+			echo "--- Last 5 lines of $log_file ---"
+			tail -n 5 "$log_file"
 			rm -f "$pid_file"
 			return 1
 			;;
