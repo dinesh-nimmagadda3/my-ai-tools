@@ -131,12 +131,17 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/HEAD/src/
 - Use `qmd mcp --http` to start a long-lived server (prevents model reloading).
 - Set `QMD_EMBED_MODEL` to override the default GGUF embedding model.
 
-**Prerequisite:** `qmd` binary must be installed (`bun install -g @tobilu/qmd`)
+**Troubleshooting (Node.js Version):**
+> [!WARNING]
+> `qmd` utilizes `better-sqlite3`, which may have compatibility issues with very recent Node.js versions (e.g., **v23+**). If you see "Init failed for qmd" or "Connection closed" errors:
+> 1. Switch to a stable LTS version (**Node v20 or v22**).
+> 2. Or rebuild the native bindings: `npm rebuild better-sqlite3 --build-from-source`.
 
 **How to verify alignment:**
 ```bash
 # Check if the mcp command and tools match official docs
 qmd --version
+node --version
 qmd mcp --help
 ```
 
@@ -203,6 +208,9 @@ fff-mcp --help
 }
 ```
 
+> [!NOTE]
+> The Hub's multiplexer automatically expands the **`$HOME`** variable in `env` and `args` to ensure portability.
+
 **MCP Tools exposed:**
 - `create_entities` — Create multiple new entities in the graph
 - `create_relations` — Connect entities in the graph
@@ -236,12 +244,15 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
   "args": [
     "-y",
     "@modelcontextprotocol/server-filesystem",
-    "/home/dinesh/projects"
+    "$HOME"
   ],
   "shared": true,
   "enabled": true
 }
 ```
+
+> [!TIP]
+> Use **`$HOME`** in the path arguments to ensure the server works correctly regardless of the user account.
 
 **MCP Tools exposed:**
 - `read_text_file` / `read_multiple_files` — Read file contents
@@ -330,11 +341,9 @@ Edit [`configs/shared-mcp/server-registry.json`](configs/shared-mcp/server-regis
 ### Step 2 — Restart the Hub
 
 ```bash
-# Find and stop the running hub
-kill $(cat /tmp/shared-mcp-hub.pid) 2>/dev/null || true
-
 # Restart
-cd ~/.ai-tools/shared-mcp && bun run multiplexer.ts &
+cd ~/.ai-tools/shared-mcp
+./cli.sh start-hub  # Or: bun run multiplexer.ts &
 ```
 
 ### Step 3 — Verify it connected
