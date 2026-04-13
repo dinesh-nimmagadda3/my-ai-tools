@@ -13,8 +13,8 @@ services:
       - PORT=5115
       - HOME=/root
     volumes:
-      - ${PROJECT_DIR}:/app
-      - ${HOME}/.ai-tools:/root/.ai-tools
+      - ${PROJECT_DIR}:/app:z
+      - ${HOME}/.ai-tools:/root/.ai-tools:z
     restart: always
     logging:
       driver: json-file
