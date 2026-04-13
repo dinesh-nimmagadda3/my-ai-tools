@@ -166,6 +166,7 @@ Skills are per-tool instruction sets stored as `SKILL.md` files that extend an A
 | `handoffs` | Create session handoff notes (`/handoffs`) |
 | `pickup` | Resume from previous handoff (`/pickup`) |
 | `pr-review` | Automated Pull Request reviews |
+| `plannotator-review` | Interactive UI-based code reviews |
 | `slop` | Detect and remove AI-generated boilerplate |
 | `tdd` | Test-Driven Development workflows |
 
