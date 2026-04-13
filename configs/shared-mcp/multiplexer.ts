@@ -218,3 +218,27 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
+process.on("SIGINT", () => {
+  logger.info("[Hub] SIGINT received. Closing hub...");
+  process.exit(0);
+});
+
+// Global Error Handlers to prevent Hub death
+process.on("uncaughtException", (err) => {
+  logger.error({ msg: "[Hub] UNCAUGHT EXCEPTION - Preventing Crash", error: err.message, stack: err.stack });
+});
+
+process.on("unhandledRejection", (reason: any) => {
+  logger.error({ msg: "[Hub] UNHANDLED REJECTION - Preventing Crash", reason: reason?.message || reason, stack: reason?.stack });
+});
+
+// Persistence Heartbeat (Logs every 5 mins)
+setInterval(() => {
+  logger.info({ 
+    msg: "[Hub] Heartbeat", 
+    uptime: Math.floor(process.uptime()), 
+    sessions: hub["transports"].size,
+    memory: process.memoryUsage().rss 
+  });
+}, 300_000);
+

@@ -987,6 +987,41 @@ mcp_hub() {
 			rm -f "$pid_file"
 			return 1
 			;;
+		podman-setup)
+			log_info "Setting up Podman Kube deployment..."
+			local yaml_src="$SCRIPT_DIR/configs/shared-mcp/hub-pod.yaml"
+			local yaml_dest="$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
+			mkdir -p "$HOME/.ai-tools/shared-mcp"
+			
+			# Substitute variables in YAML
+			sed "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" "$yaml_src" > "$yaml_dest"
+			log_success "Generated personalized Kube YAML at $yaml_dest"
+			;;
+		service-install)
+			log_info "Installing Systemd user service for Shared MCP Hub..."
+			mkdir -p "$HOME/.config/systemd/user"
+			local unit_src="$SCRIPT_DIR/configs/shared-mcp/shared-mcp-pod.service"
+			local unit_dest="$HOME/.config/systemd/user/shared-mcp.service"
+			
+			# Adjust paths in unit file
+			sed "s|%h/projects/my-ai-tools|$SCRIPT_DIR|g" "$unit_src" > "$unit_dest"
+			
+			systemctl --user daemon-reload
+			systemctl --user enable shared-mcp.service
+			log_success "Systemd service installed and enabled at $unit_dest"
+			log_info "Use 'systemctl --user start shared-mcp' to launch"
+			;;
+		podman-start)
+			$0 mcp-hub podman-setup
+			log_info "Launching Hub as Podman Pod via Kube Play..."
+			podman kube play --network bridge --publish 5115:5115 "$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
+			log_success "Podman deployment active"
+			;;
+		podman-stop)
+			log_info "Stopping Podman Pod..."
+			podman kube down "$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
+			log_success "Podman deployment stopped"
+			;;
 		stop)
 			if [ -f "$pid_file" ]; then
 				local pid=$(cat "$pid_file")

@@ -1,0 +1,21 @@
+[Unit]
+Description=Shared MCP Hub Pod (Podman Kube Play)
+Documentation=https://github.com/dinesh-nimmagadda3/my-ai-tools
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=PODMAN_KUBE_DIR=%h/projects/my-ai-tools/configs/shared-mcp
+# Clean up any existing pod of the same name before play
+ExecStartPre=-/usr/bin/podman kube down ${PODMAN_KUBE_DIR}/hub-pod.yaml
+# Use kube play to start the pod defined in the YAML
+ExecStart=/usr/bin/podman kube play --network bridge --publish 5115:5115 ${PODMAN_KUBE_DIR}/hub-pod.yaml
+# Down on stop
+ExecStop=/usr/bin/podman kube down ${PODMAN_KUBE_DIR}/hub-pod.yaml
+# Restart policy for extreme persistence
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
