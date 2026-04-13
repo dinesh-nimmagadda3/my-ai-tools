@@ -1017,8 +1017,9 @@ mcp-hub() {
 			local yaml_dest="$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
 			mkdir -p "$HOME/.ai-tools/shared-mcp"
 			
-			# Substitute variables in YAML
-			sed "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" "$yaml_src" > "$yaml_dest"
+			# Substitute variables in YAML (Kube play doesn't expand $HOME)
+			sed -e "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" \
+			    -e "s|\$HOME|$HOME|g" "$yaml_src" > "$yaml_dest"
 			log_success "Generated personalized Kube YAML at $yaml_dest"
 			;;
 		service-install)
@@ -1028,7 +1029,8 @@ mcp-hub() {
 			local unit_dest="$HOME/.config/systemd/user/shared-mcp.service"
 			
 			# Adjust paths in unit file
-			sed "s|%h/projects/my-ai-tools|$SCRIPT_DIR|g" "$unit_src" > "$unit_dest"
+			sed -e "s|%h/projects/my-ai-tools|$SCRIPT_DIR|g" \
+			    -e "s|%h|$HOME|g" "$unit_src" > "$unit_dest"
 			
 			systemctl --user daemon-reload
 			systemctl --user enable shared-mcp.service
