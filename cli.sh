@@ -957,7 +957,13 @@ mcp_hub() {
 				log_info "[DRY RUN] (cd $hub_dir && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
 				return 0
 			fi
-			(cd "$hub_dir" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
+			# Ensure common paths are available to the Hub
+			local hub_path="$PATH"
+			[[ ":$hub_path:" != *":$HOME/.local/bin:"* ]] && hub_path="$HOME/.local/bin:$hub_path"
+			local bun_bin; bun_bin=$(bun pm bin -g 2>/dev/null)
+			[[ -n "$bun_bin" && ":$hub_path:" != *":$bun_bin:"* ]] && hub_path="$bun_bin:$hub_path"
+
+			(cd "$hub_dir" && export PATH="$hub_path" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
 			
 			local count=0
 			while [ $count -lt 5 ]; do

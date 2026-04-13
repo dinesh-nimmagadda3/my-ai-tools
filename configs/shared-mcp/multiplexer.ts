@@ -133,10 +133,19 @@ class McpHubV5 {
     logger.info(`[Hub] Connecting to backend: ${name} (${config.type})`);
     let transport;
     if (config.type === "stdio") {
+      const home = process.env.HOME || "";
+      const args = (config.args || []).map((arg: string) => arg.replace("$HOME", home));
+      const env = { ...process.env };
+      if (config.env) {
+        for (const [key, value] of Object.entries(config.env)) {
+          env[key] = (value as string).replace("$HOME", home);
+        }
+      }
+
       transport = new StdioClientTransport({
         command: config.command,
-        args: config.args,
-        env: { ...process.env, ...config.env }
+        args,
+        env
       });
     } else if (config.type === "sse" || config.type === "http") {
       transport = new StreamableHTTPClientTransport(new URL(config.url));

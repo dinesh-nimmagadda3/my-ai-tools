@@ -2,15 +2,15 @@
   "mcpServers": {
     "qmd": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "qmd", "mcp"],
+      "command": "qmd",
+      "args": ["mcp"],
       "shared": true,
       "enabled": true
     },
     "fff": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "fff-mcp"],
+      "command": "fff-mcp",
+      "args": [],
       "shared": true,
       "enabled": true
     },
@@ -43,7 +43,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/dinesh/projects"
+        "$HOME"
       ],
       "shared": true,
       "enabled": true
