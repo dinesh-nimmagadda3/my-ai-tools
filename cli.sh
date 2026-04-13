@@ -1011,21 +1011,19 @@ mcp-hub() {
 			rm -f "$pid_file"
 			return 1
 			;;
-		podman-setup)
-			log_info "Setting up Podman Kube deployment..."
-			local yaml_src="$SCRIPT_DIR/configs/shared-mcp/hub-pod.yaml"
-			local yaml_dest="$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
-			mkdir -p "$HOME/.ai-tools/shared-mcp"
+		compose-setup)
+			log_info "Setting up Podman Compose deployment..."
+			# Cleanup legacy Kube files if they exist
+			rm -f "$SCRIPT_DIR/configs/shared-mcp/hub-pod.yaml"
+			rm -f "$HOME/.config/systemd/user/shared-mcp-pod.service"
 			
-			# Substitute variables in YAML (Kube play doesn't expand $HOME)
-			sed -e "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" \
-			    -e "s|\$HOME|$HOME|g" "$yaml_src" > "$yaml_dest"
-			log_success "Generated personalized Kube YAML at $yaml_dest"
+			log_success "Podman Compose environment ready at $SCRIPT_DIR/configs/shared-mcp/docker-compose.yml"
+			log_info "You can now run './cli.sh mcp-hub service-install' or 'podman-compose up -d'"
 			;;
 		service-install)
-			log_info "Installing Systemd user service for Shared MCP Hub..."
+			log_info "Installing Systemd user service for Shared MCP Hub (Compose)..."
 			mkdir -p "$HOME/.config/systemd/user"
-			local unit_src="$SCRIPT_DIR/configs/shared-mcp/shared-mcp-pod.service"
+			local unit_src="$SCRIPT_DIR/configs/shared-mcp/shared-mcp.service"
 			local unit_dest="$HOME/.config/systemd/user/shared-mcp.service"
 			
 			# Substitute variables in unit file
@@ -1036,16 +1034,19 @@ mcp-hub() {
 			log_success "Systemd service installed and enabled at $unit_dest"
 			log_info "Use 'systemctl --user start shared-mcp' to launch"
 			;;
-		podman-start)
-			$0 mcp-hub podman-setup
-			log_info "Launching Hub as Podman Pod via Kube Play..."
-			podman kube play --network bridge --publish 5115:5115 "$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
-			log_success "Podman deployment active"
+		compose-up)
+			log_info "Launching Hub via Podman Compose..."
+			(cd "$SCRIPT_DIR/configs/shared-mcp" && export PROJECT_DIR="$SCRIPT_DIR" && podman-compose up -d)
+			log_success "Podman Compose deployment active"
 			;;
-		podman-stop)
-			log_info "Stopping Podman Pod..."
-			podman kube down "$HOME/.ai-tools/shared-mcp/hub-pod.yaml"
-			log_success "Podman deployment stopped"
+		compose-down)
+			log_info "Stopping Podman Compose deployment..."
+			(cd "$SCRIPT_DIR/configs/shared-mcp" && podman-compose down)
+			log_success "Podman Compose deployment stopped"
+			;;
+		podman-setup | podman-start | podman-stop)
+			log_error "Deprecated command. Please use 'mcp-hub compose-setup' or 'mcp-hub service-install'"
+			exit 1
 			;;
 		stop)
 			if [ -f "$pid_file" ]; then
