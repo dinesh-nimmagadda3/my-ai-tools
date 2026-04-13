@@ -171,6 +171,45 @@ fff-mcp --version
 
 ---
 
+### 5. memory
+
+| Property | Value |
+|---|---|
+| **Upstream** | [MCP Servers (Memory)](https://github.com/modelcontextprotocol/servers/tree/main/src/memory) |
+| **Package** | `@modelcontextprotocol/server-memory` |
+| **Type** | `stdio` (local, spawned via npx) |
+| **Purpose** | Persistent knowledge graph memory — Claude remembers facts about you across chats |
+
+**Registry entry:**
+```json
+"memory": {
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-memory"],
+  "env": {
+    "MEMORY_FILE_PATH": "$HOME/.ai-tools/memory.jsonl"
+  },
+  "shared": true,
+  "enabled": true
+}
+```
+
+**MCP Tools exposed:**
+- `create_entities` — Create multiple new entities in the graph
+- `create_relations` — Connect entities in the graph
+- `add_observations` — Add new facts to existing entities
+- `delete_entities` / `delete_relations` / `delete_observations` — Cleanup tools
+- `read_graph` — View the entire memory state
+- `search_nodes` / `open_nodes` — Query and retrieve memory
+
+**How to verify alignment:**
+```bash
+# Verify the README for command/args
+curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/memory/README.md | grep "@modelcontextprotocol/server-memory"
+```
+
+---
+
 ## ➕ Adding a New MCP Server
 
 ### Step 1 — Add to the registry
@@ -228,6 +267,7 @@ Use this checklist periodically to keep configurations aligned with upstream:
 | `sequential-thinking` | https://github.com/modelcontextprotocol/servers | `npm show @modelcontextprotocol/server-sequential-thinking` |
 | `qmd` | https://github.com/tobi/qmd | `npm show @tobilu/qmd` |
 | `fff` | https://github.com/dmtrKovalenko/fff.nvim | Install script URL |
+| `memory` | https://github.com/modelcontextprotocol/servers/tree/main/src/memory | `npm show @modelcontextprotocol/server-memory` |
 
 **Things to check on each server update:**
 - [ ] URL or package name changed?

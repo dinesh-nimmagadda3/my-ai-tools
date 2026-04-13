@@ -26,6 +26,16 @@
       "url": "https://mcp.context7.com/mcp",
       "shared": true,
       "enabled": true
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "$HOME/.ai-tools/memory.jsonl"
+      },
+      "shared": true,
+      "enabled": true
     }
   }
 }
