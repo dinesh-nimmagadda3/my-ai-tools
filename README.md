@@ -154,21 +154,32 @@ All connected tools will automatically inherit the new server. No client reconfi
 
 Skills are per-tool instruction sets stored as `SKILL.md` files that extend an AI tool's capabilities.
 
-### Available Skills (Built-in)
+### Available Skills (22 Built-in)
 
-| Skill | Description |
-|---|---|
-| `prd` | Generate Product Requirements Documents |
-| `ralph` | Convert PRDs to JSON for agent execution |
-| `qmd-knowledge` | Project knowledge management |
-| `codemap` | Parallel codebase analysis |
-| `adr` | Architecture Decision Records |
-| `handoffs` | Create session handoff notes (`/handoffs`) |
-| `pickup` | Resume from previous handoff (`/pickup`) |
-| `pr-review` | Automated Pull Request reviews |
-| `plannotator-review` | Interactive UI-based code reviews |
-| `slop` | Detect and remove AI-generated boilerplate |
-| `tdd` | Test-Driven Development workflows |
+| Category | Skill | Description |
+|---|---|---|
+| **Planning** | `bootstrap` | Establishing a disciplined skill-first session |
+| | `brainstorm` | Intent discovery and design exploration before code |
+| | `prd` | Generating Product Requirements Documents |
+| | `write-plan` | Decomposing specs into bite-sized TDD tasks |
+| **Execution** | `subagent-dev` | Plan execution with isolated subagent loops |
+| | `exec-plan` | Sequential task execution from a written plan |
+| | `tdd` | Red-Green-Refactor development cycle |
+| | `parallel-agents`| Orchestrating independent subagents for speed |
+| | `ralph` | Converting PRDs to JSON for agent ingestion |
+| **Quality** | `pr-review` | Requesting/receiving PR feedback (RIGOROUS) |
+| | `debug` | Systematic 4-phase root-cause investigation |
+| | `verify-close` | Mandatory evidence-based success verification |
+| | `plannotator-review` | Interactive UI-based code reviews |
+| | `slop` | Detecting and removing AI-generated boilerplate |
+| **Git & Workflow**| `finish-branch` | Standardized merge, PR, and cleanup options |
+| | `git-worktree` | Isolated parallel workspaces for features |
+| | `adr` | Creating Architecture Decision Records |
+| **Session Mgmt** | `handoffs` | Creating session handoff notes (`/handoffs`) |
+| | `pickup` | Resuming work from the latest handoff notes |
+| | `codemap` | Parallel codebase analysis and mapping |
+| **Knowledge** | `write-skill` | TDD-based documentation for new skills |
+| | `qmd-knowledge` | Persistent project knowledge management |
 
 ### Adding a New Skill
 
