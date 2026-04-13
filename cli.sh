@@ -1211,8 +1211,14 @@ setup_claude_mcp_servers() {
 	if [ "$CONFIG_CLAUDE_MCP" = "1" ] || [[ -z "$CONFIG_CLAUDE_MCP" && "$INSTALL_HUB" = true ]]; then
 		log_info "Linking Shared Hub Bridge to Claude..."
 		local bridge_path="$HOME/.ai-tools/shared-mcp/bridge.ts"
-		execute "claude mcp add --scope user --transport stdio shared-hub -- bun run $bridge_path"
-		log_success "Claude now connected via Shared Hub Bridge"
+		
+		# Check if already exists before adding
+		if ! claude mcp list --scope user 2>/dev/null | grep -q "shared-hub"; then
+			execute "claude mcp add --scope user --transport stdio shared-hub -- bun run $bridge_path"
+			log_success "Claude now connected via Shared Hub Bridge"
+		else
+			log_info "Claude Shared Hub already exists - skipping registration"
+		fi
 	elif [ "$CONFIG_CLAUDE_MCP" = "2" ]; then
 		log_info "Setting up standalone MCP servers for Claude..."
 		install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
