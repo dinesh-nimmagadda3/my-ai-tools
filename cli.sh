@@ -20,9 +20,11 @@ INSTALL_BACKENDS=false
 INSTALL_TOOLING=false
 
 
-# Parse command-line arguments first
-for arg in "$@"; do
-	case $arg in
+# Parse command-line arguments
+COMMAND=""
+declare -a COMMAND_ARGS
+while [ $# -gt 0 ]; do
+	case $1 in
 	--dry-run)
 		DRY_RUN=true
 		shift
@@ -50,10 +52,28 @@ for arg in "$@"; do
 		rollback_transaction
 		exit $?
 		;;
-	*)
-		echo "Unknown option: $arg"
-		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--rollback]"
+	mcp-hub | mcp_hub)
+		COMMAND="mcp-hub"
+		shift
+		# Collect remaining args for the subcommand
+		COMMAND_ARGS=("$@")
+		break
+		;;
+	-*)
+		echo "Unknown option: $1"
+		echo "Usage: $0 [--dry-run] [--backup] [--no-backup] [--yes|-y] [-v|--verbose] [--rollback] [mcp-hub subcommand]"
 		exit 1
+		;;
+	*)
+		# Treat first non-flag as a potential command if not already set
+		if [ -z "$COMMAND" ]; then
+			COMMAND="$1"
+			shift
+			COMMAND_ARGS=("$@")
+			break
+		else
+			shift
+		fi
 		;;
 	esac
 done
@@ -941,6 +961,10 @@ ensure_hub_running() {
 }
 
 mcp_hub() {
+	mcp-hub "$@"
+}
+
+mcp-hub() {
 	local action="$1"
 	local hub_dir="$HOME/.ai-tools/shared-mcp"
 	local pid_file="$hub_dir/hub.pid"
@@ -1832,4 +1856,16 @@ main() {
 }
 
 
-main
+if [ -n "$COMMAND" ]; then
+	case "$COMMAND" in
+		mcp-hub | mcp_hub)
+			mcp-hub "${COMMAND_ARGS[@]}"
+			;;
+		*)
+			log_error "Unknown command: $COMMAND"
+			exit 1
+			;;
+	esac
+else
+	main
+fi
