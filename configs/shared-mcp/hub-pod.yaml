@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
   - name: shared-mcp-hub
-    image: oven/bun:latest
+    image: docker.io/oven/bun:latest
     workingDir: /app/configs/shared-mcp
     command: ["bun", "run", "multiplexer.ts"]
     ports:
@@ -31,7 +31,7 @@ spec:
   - name: app-code
     hostPath:
       path: $REPLACE_WITH_PROJECT_DIR
-      type: Directory
+      type: DirectoryOrCreate
   - name: home-config
     hostPath:
       path: $HOME/.ai-tools
