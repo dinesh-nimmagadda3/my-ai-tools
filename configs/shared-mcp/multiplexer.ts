@@ -145,7 +145,7 @@ class McpHubV5 {
       transport = new StdioClientTransport({
         command: config.command,
         args,
-        env
+        env: env as Record<string, string>
       });
     } else if (config.type === "sse" || config.type === "http") {
       transport = new StreamableHTTPClientTransport(new URL(config.url));
