@@ -1044,6 +1044,25 @@ mcp-hub() {
 			(cd "$SCRIPT_DIR/configs/shared-mcp" && podman compose down)
 			log_success "Podman Compose deployment stopped"
 			;;
+		cleanup-legacy)
+			log_info "Cleaning up legacy (non-containerized) Hub artifacts..."
+			# 1. Kill any stale local processes
+			if [ -f "$HOME/.ai-tools/shared-mcp/hub.pid" ]; then
+				local pid=$(cat "$HOME/.ai-tools/shared-mcp/hub.pid")
+				kill "$pid" 2>/dev/null || true
+				rm -f "$HOME/.ai-tools/shared-mcp/hub.pid"
+			fi
+			fuser -k 5115/tcp 2>/dev/null || true
+			
+			# 2. Remove legacy systemd units
+			rm -f "$HOME/.config/systemd/user/shared-mcp-pod.service"
+			systemctl --user daemon-reload
+			
+			# 3. Clean up old logs
+			rm -f "$HOME/.ai-tools/shared-mcp/hub.log"
+			
+			log_success "Legacy cleanup complete. Only Podman services remain."
+			;;
 		podman-setup | podman-start | podman-stop)
 			log_error "Deprecated command. Please use 'mcp-hub compose-setup' or 'mcp-hub service-install'"
 			exit 1
