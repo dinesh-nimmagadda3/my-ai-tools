@@ -779,6 +779,92 @@ install_gemini() {
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
 }
 
+# --- Shared MCP Multiplexer ---
+
+install_shared_mcp() {
+	log_info "Setting up Shared MCP Multiplexer..."
+	local hub_dir="$SCRIPT_DIR/configs/shared-mcp"
+	
+	if [ ! -d "$hub_dir" ]; then
+		log_error "Shared MCP directory not found at $hub_dir"
+		return 1
+	fi
+
+	(cd "$hub_dir" && execute "bun install")
+	log_success "Shared MCP dependencies installed"
+}
+
+ensure_hub_running() {
+	local pid_file="/tmp/shared-mcp-hub.pid"
+	if [ -f "$pid_file" ] && kill -0 $(cat "$pid_file") 2>/dev/null; then
+		# Hub is running, check if it responds
+		if curl -s http://localhost:5115/status >/dev/null 2>&1; then
+			return 0
+		fi
+	fi
+	
+	log_info "Shared MCP Hub not active - performing lazy auto-start..."
+	mcp_hub start
+}
+
+mcp_hub() {
+	local action="$1"
+	local hub_dir="$SCRIPT_DIR/configs/shared-mcp"
+	local pid_file="/tmp/shared-mcp-hub.pid"
+	local log_file="/tmp/shared-mcp-hub.log"
+	
+	case "$action" in
+		start)
+			if [ -f "$pid_file" ] && kill -0 $(cat "$pid_file") 2>/dev/null; then
+				log_warning "Shared MCP Hub is already running (PID: $(cat "$pid_file"))"
+				return 0
+			fi
+			log_info "Starting Shared MCP Hub V3..."
+			(cd "$hub_dir" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
+			
+			local count=0
+			while [ $count -lt 5 ]; do
+				if curl -s http://localhost:5115/status >/dev/null 2>&1; then
+					log_success "Shared MCP Hub V3 ACTIVE on http://localhost:5115"
+					return 0
+				fi
+				sleep 1
+				count=$((count+1))
+			done
+			log_error "Failed to start. Check $log_file"
+			rm -f "$pid_file"
+			return 1
+			;;
+		stop)
+			if [ -f "$pid_file" ]; then
+				local pid=$(cat "$pid_file")
+				log_info "Stopping Shared MCP Hub (PID: $pid)..."
+				kill "$pid" 2>/dev/null || true
+				rm -f "$pid_file"
+				log_success "Hub stopped"
+			else
+				log_warning "Hub is not running"
+			fi
+			;;
+		status)
+			if [ -f "$pid_file" ] && kill -0 $(cat "$pid_file") 2>/dev/null; then
+				local pid=$(cat "$pid_file")
+				log_success "Hub Process ACTIVE (PID: $pid)"
+				echo "--- Health Dashboard ---"
+				curl -s http://localhost:5115/status | jq .
+			else
+				log_warning "Shared MCP Hub is INACTIVE"
+			fi
+			;;
+		*)
+			echo "Usage: $0 mcp_hub {start|stop|status}"
+			;;
+	esac
+}
+
+
+
+
 
 
 
@@ -1469,6 +1555,13 @@ main() {
 
 	install_gemini
 	echo
+
+	install_shared_mcp
+	echo
+
+	mcp_hub start
+	echo
+
 
 	echo
 

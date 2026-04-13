@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "qmd": {
+      "type": "stdio",
+      "command": "qmd",
+      "args": ["mcp"],
+      "shared": true,
+      "enabled": true
+    },
+    "fff": {
+      "type": "stdio",
+      "command": "fff-mcp",
+      "args": [],
+      "shared": true,
+      "enabled": true
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "shared": true,
+      "enabled": true
+    },
+    "context7": {
+      "type": "sse",
+      "url": "https://mcp.context7.com/mcp",
+      "shared": true,
+      "enabled": true
+    }
+  }
+}
+

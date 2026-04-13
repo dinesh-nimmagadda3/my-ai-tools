@@ -2,8 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
   "mcpServers": {
     "hub": {
-      "url": "http://localhost:3000/sse"
+      "url": "http://localhost:5115/sse",
+      "trust": true
     }
+
+
   },
 
   "security": {

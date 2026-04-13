@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "shared-hub": {
+      "command": "bun",
+      "args": [
+        "run",
+        "~/projects/my-ai-tools/configs/shared-mcp/bridge.ts"
+      ],
+      "env": {
+        "HUB_URL": "http://localhost:5115/sse"
+      }
+
+    }
+  }
+}
