@@ -51,6 +51,11 @@ curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main
 git clone https://github.com/dinesh-nimmagadda3/my-ai-tools.git
 cd my-ai-tools
 ./cli.sh
+
+# Deploy the Hub persistently (Optional but Recommended)
+./cli.sh mcp-hub compose-setup
+./cli.sh mcp-hub service-install
+systemctl --user start shared-mcp
 ```
 
 ---
@@ -107,6 +112,8 @@ Everything gets permanently installed onto your machine:
 | OpenCode config | `~/.config/opencode/` |
 | Codex config | `~/.codex/` |
 | Shared MCP Hub | `~/.ai-tools/shared-mcp/` |
+| Podman Context | `~/projects/my-ai-tools/configs/shared-mcp/` |
+| Systemd Service | `~/.config/systemd/user/shared-mcp.service` |
 | Skills | `~/.claude/skills/`, `~/.gemini/skills/`, etc. |
 | Best practices | `~/.ai-tools/best-practices.md` |
 
@@ -114,22 +121,33 @@ Everything gets permanently installed onto your machine:
 
 ---
 
-## 🔗 Shared MCP Hub (V5) Architecture
-
-Instead of each AI tool connecting to MCP servers individually, this kit uses a central **Shared Hub** as a single point of connection.
-
-```
 Claude Code  ──┐
 Gemini CLI   ──┤──▶  Shared Hub (port 5115)  ──▶  fff, qmd, context7 (Core)
-OpenCode     ──┤         bridge.ts                  memory (Memory Graph)
-Codex CLI    ──┘       multiplexer.ts               filesystem, devtools (Sys)
-                                                    sequential-thinking (Logic)
+OpenCode     ──┤      (Podman Compose)           memory (Memory Graph)
+Codex CLI    ──┘       multiplexer.ts            filesystem, devtools (Sys)
+                                                 sequential-thinking (Logic)
 ```
 
 **How it works:**
-- Claude Code and Codex connect via **STDIO Bridge** (`bridge.ts`)
-- Gemini CLI and OpenCode connect via **Streamable HTTP** (`http://localhost:5115/hub`)
-- The hub is installed to `~/.ai-tools/shared-mcp/` and runs as a background service via `bun`
+- **Containerized**: The Hub runs inside a Podman container (`docker.io/oven/bun`) for maximum stability.
+- **Persistent**: Managed by `systemd` to ensure it starts on boot and auto-restarts on failure.
+- **Standardized**: Uses a standard `docker-compose.yml` for easy management.
+
+**Management Commands:**
+
+```bash
+./cli.sh mcp-hub compose-up      # Launch the cluster
+./cli.sh mcp-hub compose-down    # Stop the cluster
+./cli.sh mcp-hub service-install # Register systemd unit
+./cli.sh mcp-hub cleanup-legacy  # Wipe stale local processes
+```
+
+**Verification:**
+```bash
+systemctl --user status shared-mcp  # Check service status
+podman ps                           # Verify container health
+journalctl --user -u shared-mcp -f  # Watch hub logs & heartbeats
+```
 
 **Adding a new MCP server:**
 
