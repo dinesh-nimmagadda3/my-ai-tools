@@ -4,8 +4,7 @@ services:
   shared-mcp-hub:
     image: docker.io/oven/bun:latest
     container_name: shared-mcp-hub
-    working_dir: /app/configs/shared-mcp
-    command: bun run multiplexer.ts
+    command: bun run /app/configs/shared-mcp/multiplexer.ts
     ports:
       - "5115:5115"
     environment:
