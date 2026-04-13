@@ -10,6 +10,14 @@ BACKUP=false
 PROMPT_BACKUP=true
 YES_TO_ALL=false
 VERBOSE=false
+# Installation Flags
+INSTALL_CLAUDE=false
+INSTALL_GEMINI=false
+INSTALL_OPENCODE=false
+INSTALL_CODEX=false
+INSTALL_HUB=false
+INSTALL_BACKENDS=false
+INSTALL_TOOLING=false
 
 
 # Parse command-line arguments first
@@ -56,6 +64,122 @@ if is_non_interactive; then
 	YES_TO_ALL=true
 	log_info "Non-interactive mode detected (CI or piped input)"
 fi
+# Interactive component selection
+show_selection_menu() {
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-selecting all components (--yes flag)"
+		INSTALL_CLAUDE=true
+		INSTALL_GEMINI=true
+		INSTALL_OPENCODE=true
+		INSTALL_CODEX=true
+		INSTALL_HUB=true
+		INSTALL_BACKENDS=true
+		INSTALL_TOOLING=true
+		return
+	fi
+
+	echo "Select components to install (e.g., 1,2,5 or 'all'):"
+	echo "1) Claude Code (CLI)"
+	echo "2) Gemini CLI"
+	echo "3) OpenCode (TUI/CLI)"
+	echo "4) OpenAI Codex CLI"
+	echo "5) Shared MCP Hub (V5 Infrastructure)"
+	echo "6) Common MCP Backends (fff-mcp, qmd, context7)"
+	echo "7) Global Tooling (biome, ruff, jq, etc.)"
+	echo "all) Install everything"
+	echo
+	read -p "Selection: " selection
+
+	if [[ "$selection" == "all" ]]; then
+		INSTALL_CLAUDE=true; INSTALL_GEMINI=true; INSTALL_OPENCODE=true;
+		INSTALL_CODEX=true; INSTALL_HUB=true; INSTALL_BACKENDS=true; INSTALL_TOOLING=true
+		return
+	fi
+
+	IFS=',' read -ra ADDR <<< "$selection"
+	for i in "${ADDR[@]}"; do
+		case $(echo "$i" | xargs) in
+			1) INSTALL_CLAUDE=true ;;
+			2) INSTALL_GEMINI=true ;;
+			3) INSTALL_OPENCODE=true ;;
+			4) INSTALL_CODEX=true ;;
+			5) INSTALL_HUB=true ;;
+			6) INSTALL_BACKENDS=true ;;
+			7) INSTALL_TOOLING=true ;;
+		esac
+	done
+
+	run_setup_wizard
+}
+
+# Per-tool configuration wizard
+run_setup_wizard() {
+	local selected_tools=()
+	[ "$INSTALL_CLAUDE" = true ] && selected_tools+=("Claude")
+	[ "$INSTALL_GEMINI" = true ] && selected_tools+=("Gemini")
+	[ "$INSTALL_OPENCODE" = true ] && selected_tools+=("OpenCode")
+	[ "$INSTALL_CODEX" = true ] && selected_tools+=("Codex")
+
+	if [ ${#selected_tools[@]} -eq 0 ]; then
+		return
+	fi
+
+	echo
+	echo "--- Tool Configuration Wizard ---"
+	
+	local apply_to_all=false
+	local shared_mcp_choice="1"
+	local shared_skills="all"
+
+	for tool in "${selected_tools[@]}"; do
+		echo
+		log_info "Configuring $tool:"
+
+		local mcp_choice="1"
+		local skill_choice="all"
+
+		if [ "$apply_to_all" = true ]; then
+			log_success "Applying shared configuration to $tool"
+			mcp_choice="$shared_mcp_choice"
+			skill_choice="$shared_skills"
+		else
+			echo "  Select MCP Connection:"
+			echo "    1) Use Shared Hub (Recommended - Connects to local Hub)"
+			echo "    2) Standalone (Direct connections, no Hub)"
+			read -p "  Choice [1]: " mcp_choice_input
+			mcp_choice=${mcp_choice_input:-1}
+
+			echo "  Available Skills in kit:"
+			local available_skills=""
+			if [ -d "$SCRIPT_DIR/skills" ]; then
+				for skill_path in "$SCRIPT_DIR/skills"/*; do
+					[ -d "$skill_path" ] && available_skills="$available_skills $(basename "$skill_path"),"
+				done
+				echo "    [ ${available_skills%,} ]"
+			else
+				echo "    [ None found in skills/ ]"
+			fi
+			
+			echo "  Select Skills to install by name (e.g. 'pr-review, tdd'), 'all', or 'none':"
+			read -p "  Skills [all]: " skill_choice_input
+			skill_choice=${skill_choice_input:-all}
+
+			if [ ${#selected_tools[@]} -gt 1 ] && [ "$tool" = "${selected_tools[0]}" ]; then
+				echo
+				read -p "  Apply this configuration to all other selected tools? (y/N): " apply_choice
+				if [[ "$apply_choice" =~ ^[Yy]$ ]]; then
+					apply_to_all=true
+					shared_mcp_choice="$mcp_choice"
+					shared_skills="$skill_choice"
+				fi
+			fi
+		fi
+
+		# Store configuration in standard variables exported for the rest of the script
+		export "CONFIG_${tool^^}_MCP"="$mcp_choice"
+		export "CONFIG_${tool^^}_SKILLS"="$skill_choice"
+	done
+}
 
 # Preflight check for required tools
 preflight_check() {
@@ -782,16 +906,25 @@ install_gemini() {
 # --- Shared MCP Multiplexer ---
 
 install_shared_mcp() {
-	log_info "Setting up Shared MCP Multiplexer..."
-	local hub_dir="$SCRIPT_DIR/configs/shared-mcp"
+	log_info "Setting up Shared MCP Multiplexer globally..."
+	local source_hub_dir="$SCRIPT_DIR/configs/shared-mcp"
+	local target_hub_dir="$HOME/.ai-tools/shared-mcp"
 	
-	if [ ! -d "$hub_dir" ]; then
-		log_error "Shared MCP directory not found at $hub_dir"
+	if [ ! -d "$source_hub_dir" ]; then
+		log_error "Shared MCP source directory not found at $source_hub_dir"
 		return 1
 	fi
 
-	(cd "$hub_dir" && execute "bun install")
-	log_success "Shared MCP dependencies installed"
+	execute_quoted mkdir -p "$target_hub_dir"
+	safe_copy_dir "$source_hub_dir" "$target_hub_dir"
+
+	if [ "$DRY_RUN" = true ]; then
+		log_info "[DRY RUN] (cd $target_hub_dir && bun install)"
+	else
+		(cd "$target_hub_dir" && execute "bun install")
+	fi
+	log_success "Shared MCP installed to $target_hub_dir"
+
 }
 
 ensure_hub_running() {
@@ -809,7 +942,7 @@ ensure_hub_running() {
 
 mcp_hub() {
 	local action="$1"
-	local hub_dir="$SCRIPT_DIR/configs/shared-mcp"
+	local hub_dir="$HOME/.ai-tools/shared-mcp"
 	local pid_file="/tmp/shared-mcp-hub.pid"
 	local log_file="/tmp/shared-mcp-hub.log"
 	
@@ -820,10 +953,15 @@ mcp_hub() {
 				return 0
 			fi
 			log_info "Starting Shared MCP Hub V4..."
+			if [ "$DRY_RUN" = true ]; then
+				log_info "[DRY RUN] (cd $hub_dir && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
+				return 0
+			fi
 			(cd "$hub_dir" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
 			
 			local count=0
 			while [ $count -lt 5 ]; do
+
 				if curl -s http://localhost:5115/status >/dev/null 2>&1; then
 					log_success "Shared MCP Hub V4 ACTIVE on http://localhost:5115"
 					return 0
@@ -966,10 +1104,10 @@ copy_configurations() {
 
 	validate_all_configs
 
-	copy_claude_configs
-	copy_opencode_configs
-	copy_codex_configs
-	copy_gemini_configs
+	[ "$INSTALL_CLAUDE" = true ] && copy_claude_configs
+	[ "$INSTALL_OPENCODE" = true ] && copy_opencode_configs
+	[ "$INSTALL_CODEX" = true ] && copy_codex_configs
+	[ "$INSTALL_GEMINI" = true ] && copy_gemini_configs
 	copy_best_practices
 }
 
@@ -1054,26 +1192,34 @@ setup_claude_mcp_servers() {
 		return 0
 	fi
 
-	log_info "Setting up Claude Code MCP servers (global scope)..."
-	install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
-	install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
-
-	handle_qmd_installation_if_needed
-	if command -v qmd &>/dev/null; then
-		install_mcp_interactive "qmd" "claude mcp add --scope user --transport stdio qmd -- qmd mcp" "knowledge management"
-	else
-		log_warning "qmd not found. MCP setup skipped. Install with: bun install -g @tobilu/qmd"
+	log_info "Setting up Claude Code MCP..."
+	
+	if [ "$CONFIG_CLAUDE_MCP" = "1" ] || [[ -z "$CONFIG_CLAUDE_MCP" && "$INSTALL_HUB" = true ]]; then
+		log_info "Linking Shared Hub Bridge to Claude..."
+		local bridge_path="$HOME/.ai-tools/shared-mcp/bridge.ts"
+		execute "claude mcp add --scope user --transport stdio shared-hub -- bun run $bridge_path"
+		log_success "Claude now connected via Shared Hub Bridge"
+	elif [ "$CONFIG_CLAUDE_MCP" = "2" ]; then
+		log_info "Setting up standalone MCP servers for Claude..."
+		install_mcp_interactive "context7" "claude mcp add --scope user --transport stdio context7 -- npx -y @upstash/context7-mcp@latest" "documentation lookup"
+		install_mcp_interactive "sequential-thinking" "claude mcp add --scope user --transport stdio sequential-thinking -- npx -y @modelcontextprotocol/server-sequential-thinking" "multi-step reasoning"
 	fi
-
-	handle_fff_mcp_installation_if_needed
-	if command -v fff-mcp &>/dev/null; then
-		install_mcp_interactive "fff" "claude mcp add --scope user --transport stdio fff -- fff-mcp" "fast file search with memory"
-	else
-		log_warning "fff-mcp not found. MCP setup skipped. Install with: curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash"
-	fi
-
-	log_success "MCP server setup complete (global scope)"
 }
+
+
+setup_backend_services() {
+	if [ "$INSTALL_BACKENDS" != true ]; then
+		return 0
+	fi
+
+	log_info "Installing common MCP backend services..."
+	handle_qmd_installation_if_needed
+	handle_fff_mcp_installation_if_needed
+	
+	log_success "Backend services available for Hub usage"
+}
+
+
 
 copy_opencode_configs() {
 	local opencode_status
@@ -1490,25 +1636,37 @@ copy_skill_to_targets() {
 	local managed_marker=".my-ai-tools-managed"
 
 	if skill_is_compatible_with "$skill_dir" "claude"; then
-		safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
-		execute_quoted touch "$CLAUDE_SKILLS_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to Claude Code"
+		if [[ "$CONFIG_CLAUDE_SKILLS" == "all" ]] || [[ ",$CONFIG_CLAUDE_SKILLS," == *",$skill_name,"* ]]; then
+			safe_copy_dir "$skill_dir" "$CLAUDE_SKILLS_DIR/$skill_name"
+			execute_quoted touch "$CLAUDE_SKILLS_DIR/$skill_name/$managed_marker"
+			log_success "Copied $skill_name to Claude Code"
+		else
+			log_info "Skipped $skill_name for Claude Code (user deselected)"
+		fi
 	else
 		log_info "Skipped $skill_name for Claude Code (not compatible)"
 	fi
 
 	if skill_is_compatible_with "$skill_dir" "opencode"; then
-		safe_copy_dir "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
-		execute_quoted touch "$OPENCODE_SKILL_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to OpenCode"
+		if [[ "$CONFIG_OPENCODE_SKILLS" == "all" ]] || [[ ",$CONFIG_OPENCODE_SKILLS," == *",$skill_name,"* ]]; then
+			safe_copy_dir "$skill_dir" "$OPENCODE_SKILL_DIR/$skill_name"
+			execute_quoted touch "$OPENCODE_SKILL_DIR/$skill_name/$managed_marker"
+			log_success "Copied $skill_name to OpenCode"
+		else
+			log_info "Skipped $skill_name for OpenCode (user deselected)"
+		fi
 	else
 		log_info "Skipped $skill_name for OpenCode (not compatible)"
 	fi
 
 	if skill_is_compatible_with "$skill_dir" "gemini"; then
-		safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
-		execute_quoted touch "$GEMINI_SKILLS_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to Gemini CLI"
+		if [[ "$CONFIG_GEMINI_SKILLS" == "all" ]] || [[ ",$CONFIG_GEMINI_SKILLS," == *",$skill_name,"* ]]; then
+			safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
+			execute_quoted touch "$GEMINI_SKILLS_DIR/$skill_name/$managed_marker"
+			log_success "Copied $skill_name to Gemini CLI"
+		else
+			log_info "Skipped $skill_name for Gemini CLI (user deselected)"
+		fi
 	else
 		log_info "Skipped $skill_name for Gemini CLI (not compatible)"
 	fi
@@ -1532,65 +1690,54 @@ main() {
 	check_prerequisites
 	echo
 
+	show_selection_menu
+	echo
+
 	backup_configs
 	echo
 
-	install_claude_code
-	echo
+	if [ "$INSTALL_CLAUDE" = true ]; then
+		install_claude_code
+		echo
+	fi
 
-	install_opencode
-	echo
+	if [ "$INSTALL_OPENCODE" = true ]; then
+		install_opencode
+		echo
+	fi
 
-	echo
+	if [ "$INSTALL_TOOLING" = true ]; then
+		install_global_tools
+		echo
+	fi
 
-	install_global_tools
-	echo
+	if [ "$INSTALL_CODEX" = true ]; then
+		install_codex
+		echo
+	fi
 
-	echo
+	if [ "$INSTALL_GEMINI" = true ]; then
+		install_gemini
+		echo
+	fi
 
-	echo
+	if [ "$INSTALL_HUB" = true ]; then
+		install_shared_mcp
+		mcp_hub start
+		echo
+	fi
 
-	install_codex
-	echo
-
-	install_gemini
-	echo
-
-	install_shared_mcp
-	echo
-
-	mcp_hub start
-	echo
-
-
-	echo
-
-	echo
-
-	echo
-
-	echo
-
-	echo
+	if [ "$INSTALL_BACKENDS" = true ]; then
+		setup_backend_services
+		echo
+	fi
 
 	copy_configurations
-	echo
-
 	install_skills
-	echo
 
 	log_success "Setup complete!"
 	echo
-	echo "Next steps:"
-	echo "  1. Restart your terminal"
-	echo "  2. Run 'claude' to start Claude Code"
-	echo "  3. Use slash commands like /help to see available skills"
-	echo "  4. Check out the README.md for more information"
-	echo
-
-	if [ "$BACKUP" = true ]; then
-		echo "Your old configs have been backed up to: $BACKUP_DIR"
-	fi
 }
+
 
 main
