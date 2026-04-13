@@ -86,28 +86,40 @@ class McpHubV5 {
 
         if (sessionId && this.transports.has(sessionId)) {
           transport = this.transports.get(sessionId);
-        } else if (!sessionId && req.method === "POST" && isInitializeRequest(req.body)) {
-          // New Session Initialization
-          logger.info("[Hub] Initializing new Hub session");
-          transport = new StreamableHTTPServerTransport({
-            sessionIdGenerator: () => randomUUID(),
-            onsessioninitialized: (sid) => {
-              logger.info(`[Hub] Session initialized: ${sid}`);
-              if (transport) this.transports.set(sid, transport);
-            }
-          });
+        } else if (!sessionId && req.method === "POST") {
+          // Diagnostic: Log incoming request body to identify handshake issues
+          const body = req.body;
+          const isInit = isInitializeRequest(body) || (body?.method === "initialize");
+          
+          if (isInit) {
+            logger.info({ 
+              msg: "[Hub] Initializing new Hub session", 
+              protocolVersion: body?.params?.protocolVersion,
+              clientName: body?.params?.clientInfo?.name 
+            });
 
-          transport.onclose = () => {
-            if (transport?.sessionId) {
-              logger.info(`[Hub] Session closed: ${transport.sessionId}`);
-              this.transports.delete(transport.sessionId);
-            }
-          };
+            transport = new StreamableHTTPServerTransport({
+              sessionIdGenerator: () => randomUUID(),
+              onsessioninitialized: (sid) => {
+                logger.info(`[Hub] Session initialized: ${sid}`);
+                if (transport) this.transports.set(sid, transport);
+              }
+            });
 
-          const sessionServer = this.createSessionServer();
-          await sessionServer.connect(transport);
-          await transport.handleRequest(req, res, req.body);
-          return;
+            transport.onclose = () => {
+              if (transport?.sessionId) {
+                logger.info(`[Hub] Session closed: ${transport.sessionId}`);
+                this.transports.delete(transport.sessionId);
+              }
+            };
+
+            const sessionServer = this.createSessionServer();
+            await sessionServer.connect(transport);
+            await transport.handleRequest(req, res, body);
+            return;
+          } else {
+            logger.warn({ msg: "[Hub] Rejecting non-init session request", body });
+          }
         }
 
         if (transport) {
