@@ -779,29 +779,7 @@ install_gemini() {
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
 }
 
-install_kilocode() {
-	_run_kilocode_install() {
-		if command -v kilo &>/dev/null; then
-			log_warning "Kilo CLI is already installed"
-		else
-			execute "pnpm install -g @kilocode/cli"
-			log_success "Kilo CLI installed"
-		fi
-	}
-	run_installer "Kilo CLI" "_run_kilocode_install" "command -v kilo" ""
-}
 
-install_pi() {
-	_run_pi_install() {
-		if command -v pi &>/dev/null; then
-			log_warning "Pi AI Agent is already installed"
-		else
-			execute "pnpm install -g @mariozechner/pi-coding-agent"
-			log_success "Pi AI Agent installed"
-		fi
-	}
-	run_installer "Pi AI Agent" "_run_pi_install" "command -v pi" ""
-}
 
 
 
@@ -906,8 +884,6 @@ copy_configurations() {
 	copy_ai_launcher_configs
 	copy_codex_configs
 	copy_gemini_configs
-	copy_kilo_configs
-	copy_pi_configs
 	copy_copilot_configs
 	copy_cursor_configs
 	copy_factory_configs
@@ -932,14 +908,18 @@ validate_all_configs() {
 			config_validation_failed=true
 		fi
 	fi
+	if [ -f "$SCRIPT_DIR/configs/opencode/tui.json" ]; then
+		if ! validate_config_with_schema "$SCRIPT_DIR/configs/opencode/tui.json"; then
+			log_error "OpenCode TUI config failed validation"
+			config_validation_failed=true
+		fi
+	fi
 
 	# Validate other tool configs
 	for config_file in "$SCRIPT_DIR/configs/amp/settings.json" \
 		"$SCRIPT_DIR/configs/ai-launcher/config.json" \
 		"$SCRIPT_DIR/configs/codex/config.json" \
 		"$SCRIPT_DIR/configs/gemini/settings.json" \
-		"$SCRIPT_DIR/configs/kilo/config.json" \
-		"$SCRIPT_DIR/configs/pi/settings.json" \
 		"$SCRIPT_DIR/configs/factory/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
@@ -1027,11 +1007,20 @@ copy_opencode_configs() {
 	execute_quoted mkdir -p "$HOME/.config/opencode"
 	execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
 
+	if [ -f "$SCRIPT_DIR/configs/opencode/tui.json" ]; then
+		execute_quoted cp "$SCRIPT_DIR/configs/opencode/tui.json" "$HOME/.config/opencode/"
+	fi
+
 	execute_quoted rm -rf "$HOME/.config/opencode/agents"
 	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agents" "$HOME/.config/opencode/agents"
 
 	execute_quoted rm -rf "$HOME/.config/opencode/commands"
 	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/commands" "$HOME/.config/opencode/commands"
+
+	if [ -d "$SCRIPT_DIR/configs/opencode/skills" ]; then
+		execute_quoted rm -rf "$HOME/.config/opencode/skills"
+		safe_copy_dir "$SCRIPT_DIR/configs/opencode/skills" "$HOME/.config/opencode/skills"
+	fi
 
 	log_success "OpenCode configs copied"
 }
@@ -1136,44 +1125,7 @@ copy_gemini_configs() {
 	log_success "Gemini CLI configs copied"
 }
 
-copy_kilo_configs() {
-	local kilo_status
-	kilo_status=$(detect_tool --detailed "kilo" "$HOME/.config/kilo") || kilo_status="missing"
-	if [ "$kilo_status" = "missing" ]; then
-		log_info "Kilo CLI not detected - skipping Kilo config installation"
-		return 0
-	fi
 
-	log_info "Detected Kilo CLI (via $kilo_status)"
-	execute_quoted mkdir -p "$HOME/.config/kilo"
-	copy_config_file "$SCRIPT_DIR/configs/kilo/config.json" "$HOME/.config/kilo/" || true
-	copy_config_file "$SCRIPT_DIR/configs/kilo/AGENTS.md" "$HOME/.config/kilo/" || true
-	log_success "Kilo CLI configs copied"
-}
-
-copy_pi_configs() {
-	local pi_status
-	pi_status=$(detect_tool --detailed "pi" "$HOME/.pi") || pi_status="missing"
-	if [ "$pi_status" = "missing" ]; then
-		log_info "Pi not detected - skipping Pi config installation"
-		return 0
-	fi
-
-	log_info "Detected Pi (via $pi_status)"
-	execute_quoted mkdir -p "$HOME/.pi"
-
-	# Pi Coding Agent uses SYSTEM.md for instructions
-	if [ -f "$SCRIPT_DIR/configs/pi/SYSTEM.md" ]; then
-		copy_config_file "$SCRIPT_DIR/configs/pi/SYSTEM.md" "$HOME/.pi/" || true
-	fi
-
-	# Legacy support for AGENTS.md if present
-	if [ -f "$SCRIPT_DIR/configs/pi/AGENTS.md" ]; then
-		copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/" || true
-	fi
-
-	log_success "Pi configs aligned with system standards"
-}
 
 copy_copilot_configs() {
 	if [ ! -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && [ ! -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
@@ -1504,7 +1456,6 @@ install_local_skills() {
 	CODEX_SKILLS_DIR="$HOME/.agents/skills"
 	GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
 	CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
-	PI_SKILLS_DIR="$HOME/.pi/agent/skills"
 
 	# Prepare target directories
 	prepare_skills_dir "$CLAUDE_SKILLS_DIR"
@@ -1513,7 +1464,6 @@ install_local_skills() {
 	prepare_skills_dir "$CODEX_SKILLS_DIR"
 	prepare_skills_dir "$GEMINI_SKILLS_DIR"
 	prepare_skills_dir "$CURSOR_SKILLS_DIR"
-	prepare_skills_dir "$PI_SKILLS_DIR"
 
 	# Copy all skills from skills folder to targets
 	for skill_dir in "$SCRIPT_DIR/skills"/*; do
@@ -1622,19 +1572,13 @@ copy_skill_to_targets() {
 		log_info "Skipped $skill_name for Cursor (not compatible)"
 	fi
 
-	if skill_is_compatible_with "$skill_dir" "pi"; then
-		safe_copy_dir "$skill_dir" "$PI_SKILLS_DIR/$skill_name"
-		execute_quoted touch "$PI_SKILLS_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to Pi"
-	else
-		log_info "Skipped $skill_name for Pi (not compatible)"
-	fi
+
 }
 
 main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini • Pi • Kilo          ║"
+	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini                      ║"
 	echo "║  Copilot • Cursor • Factory Droid                                    ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
@@ -1674,11 +1618,7 @@ main() {
 	install_gemini
 	echo
 
-	install_kilocode
-	echo
 
-	install_pi
-	echo
 
 	echo
 

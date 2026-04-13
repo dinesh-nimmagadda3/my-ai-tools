@@ -32,10 +32,8 @@
 | **CCS** | `configs/ccs/` | Claude Code Switch - multi-provider |
 | **Gemini CLI** | `configs/gemini/` | Google Gemini CLI |
 | **Codex CLI** | `configs/codex/` | OpenAI Codex CLI |
-| **Pi** | `configs/pi/` | Agentic coding tool |
 | **Copilot CLI** | `configs/copilot/` | GitHub Copilot CLI |
 | **Cursor Agent** | `configs/cursor/` | Cursor Agent CLI |
-| **Kilo CLI** | `configs/kilo/` | OpenCode-based CLI |
 | **Factory Droid** | `configs/factory/` | Factory AI agent |
 | **AI Launcher** | `configs/ai-launcher/` | Tool switcher |
 

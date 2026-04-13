@@ -46,29 +46,7 @@ copy_directory() {
 	fi
 }
 
-generate_kilo_configs() {
-	log_info "Generating Kilo CLI configs..."
-	if [ ! -d "$HOME/.config/kilo" ]; then
-		log_warning "Kilo CLI config directory not found: $HOME/.config/kilo"
-		return 0
-	fi
-	execute "mkdir -p $SCRIPT_DIR/configs/kilo"
-	copy_single "$HOME/.config/kilo/config.json" "$SCRIPT_DIR/configs/kilo/config.json"
-	copy_single "$HOME/.config/kilo/AGENTS.md" "$SCRIPT_DIR/configs/kilo/AGENTS.md"
-	log_success "Kilo CLI configs generated"
-}
 
-generate_pi_configs() {
-	log_info "Generating Pi configs..."
-	if [ ! -d "$HOME/.pi" ]; then
-		log_warning "Pi config directory not found: $HOME/.pi"
-		return 0
-	fi
-	execute "mkdir -p $SCRIPT_DIR/configs/pi"
-	copy_single "$HOME/.pi/SYSTEM.md" "$SCRIPT_DIR/configs/pi/SYSTEM.md"
-	copy_single "$HOME/.pi/AGENTS.md" "$SCRIPT_DIR/configs/pi/AGENTS.md"
-	log_success "Pi configs generated"
-}
 
 # Copy a Claude subdirectory with proper logging
 # Usage: copy_claude_subdirectory "source_path" "dest_path" "name_for_logging"
@@ -95,8 +73,8 @@ copy_claude_subdirectory() {
 }
 
 # Copy skills
-# Usage: copy_skills_without_filter "source_dir" "dest_dir" "tool_name"
-copy_skills_without_filter() {
+# Usage: copy_skills "source_dir" "dest_dir" "tool_name"
+copy_skills() {
 	local source_dir="$1"
 	local dest_dir="$2"
 	local tool_name="${3:-Claude Code}"
@@ -131,7 +109,7 @@ generate_claude_configs() {
 	copy_claude_subdirectory "$HOME/.claude/commands" "$SCRIPT_DIR/configs/claude/commands" "commands"
 	copy_claude_subdirectory "$HOME/.claude/agents" "$SCRIPT_DIR/configs/claude/agents" "agents"
 	copy_claude_subdirectory "$HOME/.claude/hooks" "$SCRIPT_DIR/configs/claude/hooks" "hooks"
-	copy_skills_without_filter "$HOME/.claude/skills" "$SCRIPT_DIR/configs/claude/skills" "Claude Code"
+	copy_skills "$HOME/.claude/skills" "$SCRIPT_DIR/configs/claude/skills" "Claude Code"
 
 	# Copy settings.json (with Windows path fix)
 	copy_claude_settings
@@ -182,8 +160,11 @@ generate_opencode_configs() {
 		fi
 	fi
 
-	# Copy skills with filtering
-	copy_skills_with_filter "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"
+	# Copy tui.json
+	copy_single "$HOME/.config/opencode/tui.json" "$SCRIPT_DIR/configs/opencode/tui.json"
+
+	# Copy skills
+	copy_skills "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"
 
 	# Copy agents and configs directories
 	for subdir in agents configs; do
@@ -263,10 +244,23 @@ generate_gemini_configs() {
 		fi
 	done
 
-	# Copy skills from ~/.claude/skills if it exists
-	if [ -d "$HOME/.claude/skills" ]; then
-		copy_skills_with_filter "$HOME/.claude/skills" "$SCRIPT_DIR/configs/gemini/skills" "Gemini CLI"
+	# Copy policies directory
+	if [ -d "$HOME/.gemini/policies" ]; then
+		copy_claude_subdirectory "$HOME/.gemini/policies" "$SCRIPT_DIR/configs/gemini/policies" "Gemini policies"
 	fi
+
+	# Copy skills from ~/.gemini/skills or ~/.agents/skills
+	for src_dir in "$HOME/.gemini/skills" "$HOME/.agents/skills"; do
+		if [ -d "$src_dir" ]; then
+			copy_skills "$src_dir" "$SCRIPT_DIR/configs/gemini/skills" "Gemini CLI"
+			# Also sync to central skills/ if needed
+			if [ -n "$(ls -A "$src_dir" 2>/dev/null)" ]; then
+				log_info "Synchronizing discovered skills to central repository..."
+				execute "mkdir -p '$SCRIPT_DIR/skills'"
+				execute "cp -rn '$src_dir'/* '$SCRIPT_DIR/skills'/ 2>/dev/null || true"
+			fi
+		fi
+	done
 
 	log_success "Gemini CLI configs generated"
 }
@@ -321,12 +315,6 @@ main() {
 	echo
 
 	generate_gemini_configs
-	echo
-
-	generate_kilo_configs
-	echo
-
-	generate_pi_configs
 	echo
 
 	generate_best_practices

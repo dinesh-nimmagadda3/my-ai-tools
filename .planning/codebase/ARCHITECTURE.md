@@ -54,8 +54,6 @@ Located in `configs/` - tool-specific configurations:
 | Gemini CLI | `configs/gemini/` | `~/.gemini/` |
 | Cursor | `configs/cursor/` | `~/.cursor/` |
 | Factory | `configs/factory/` | `~/.factory/` |
-| Pi | `configs/pi/` | `~/.pi/` |
-| Kilo | `configs/kilo/` | `~/.config/kilo/` |
 | Copilot | `configs/copilot/` | `~/.copilot/` |
 
 ### 4. Skills/Marketplace Layer

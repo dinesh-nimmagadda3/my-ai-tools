@@ -1,6 +1,6 @@
 # Welcome to my-ai-tools 👋
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Codex, Gemini CLI, Kilo, and Pi with custom configurations, MCP servers, skills, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Codex, and Gemini CLI with custom configurations, MCP servers, skills, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -8,7 +8,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Codex, Gemini CLI, Kilo, and Pi
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Codex, and Gemini CLI
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)

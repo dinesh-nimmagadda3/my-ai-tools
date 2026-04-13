@@ -77,6 +77,5 @@
 	"plugin": [
 		"@plannotator/opencode@latest",
 		"@mohak34/opencode-notifier@latest"
-	],
-	"theme": "kanagawa"
+	]
 }

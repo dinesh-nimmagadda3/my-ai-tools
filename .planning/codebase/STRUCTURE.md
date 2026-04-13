@@ -56,6 +56,7 @@ configs/
 │   ├── settings.json    # Main settings
 │   ├── agents/          # Custom agents (.md)
 │   ├── commands/        # Custom commands (.toml)
+│   ├── policies/        # Tool policies (.toml)
 │   ├── GEMINI.md        # Main guidelines
 │   └── AGENTS.md        # Additional guidelines
 │
@@ -67,12 +68,6 @@ configs/
 │   ├── mcp.json         # MCP configuration
 │   ├── settings.json    # Settings
 │   └── droids/          # Custom droid definitions
-│
-├── pi/                  # Pi AI agent
-│   └── settings.json    # Global settings
-│
-├── kilo/                # Kilo CLI
-│   └── config.json      # Main config
 │
 ├── copilot/             # GitHub Copilot CLI
 │   ├── AGENTS.md        # Agent guidelines
