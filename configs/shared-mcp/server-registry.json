@@ -16,8 +16,8 @@
     },
     "sequential-thinking": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": "bun",
+      "args": ["x", "-y", "@modelcontextprotocol/server-sequential-thinking"],
       "shared": true,
       "enabled": true
     },
@@ -29,8 +29,8 @@
     },
     "memory": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "command": "bun",
+      "args": ["x", "-y", "@modelcontextprotocol/server-memory"],
       "env": {
         "MEMORY_FILE_PATH": "$HOME/.ai-tools/memory.jsonl"
       },
@@ -39,8 +39,9 @@
     },
     "filesystem": {
       "type": "stdio",
-      "command": "npx",
+      "command": "bun",
       "args": [
+        "x",
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "$HOME"
@@ -50,8 +51,9 @@
     },
     "chrome-devtools": {
       "type": "stdio",
-      "command": "npx",
+      "command": "bun",
       "args": [
+        "x",
         "-y",
         "chrome-devtools-mcp@latest",
         "--headless"

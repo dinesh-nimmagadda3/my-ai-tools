@@ -37,15 +37,44 @@ class McpHubV5 {
   private transports: Map<string, StreamableHTTPServerTransport> = new Map();
 
   constructor() {
-    this.mcpServer = new McpServer({
+    this.app = createMcpExpressApp();
+    this.setupRoutes();
+  }
+
+  private createSessionServer(): McpServer {
+    const server = new McpServer({
       name: "shared-mcp-hub",
       version: "5.0.0",
     }, {
       capabilities: { tools: {}, resources: {}, prompts: {} }
     });
 
-    this.app = createMcpExpressApp();
-    this.setupRoutes();
+    // Register Aggregated Tools
+    server.server.setRequestHandler(ListToolsRequestSchema, async () => {
+      const allTools = [];
+      for (const [name, data] of Object.entries(this.backends)) {
+        try {
+          const resp = await data.client.listTools();
+          allTools.push(...resp.tools);
+        } catch (e) { logger.warn(`[Hub] Tool listing failed for ${name}`); }
+      }
+      return { tools: allTools };
+    });
+
+    server.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+      for (const data of Object.values(this.backends)) {
+        try {
+          const { tools } = await data.client.listTools();
+          if (tools.some((t: any) => t.name === name)) {
+            return await data.client.callTool({ name, arguments: args });
+          }
+        } catch (e) { continue; }
+      }
+      throw new Error(`Tool ${name} not found across connected backends`);
+    });
+
+    return server;
   }
 
   private setupRoutes() {
@@ -76,7 +105,8 @@ class McpHubV5 {
             }
           };
 
-          await this.mcpServer.connect(transport);
+          const sessionServer = this.createSessionServer();
+          await sessionServer.connect(transport);
           await transport.handleRequest(req, res, req.body);
           return;
         }
@@ -90,25 +120,13 @@ class McpHubV5 {
             id: null
           });
         }
-      } catch (err) {
-        logger.error(`[Hub] Transport error: ${err}`);
+      } catch (err: any) {
+        logger.error(`[Hub] Transport error: ${err.message}\n${err.stack}`);
         if (!res.headersSent) res.status(500).send("Internal Hub Error");
       }
     };
 
     this.app.all("/hub", hubHandler);
-
-    // Dynamic Registration (kept for flexibility)
-    this.app.post("/register", async (req: Request, res: Response) => {
-      const { name, config } = req.body;
-      logger.info(`[Hub] Dynamic registration request for: ${name}`);
-      try {
-        await this.connectBackend(name, config);
-        res.status(200).json({ status: "ok", message: `Server ${name} registered` });
-      } catch (err) {
-        res.status(500).json({ status: "error", message: String(err) });
-      }
-    });
 
     // Health & Status Dashboard
     this.app.get("/status", (_req: Request, res: Response) => {
@@ -171,32 +189,7 @@ class McpHubV5 {
       }
     }
 
-    // 2. Setup standard request handlers using the underlying server
-    this.mcpServer.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      const allTools = [];
-      for (const [name, data] of Object.entries(this.backends)) {
-        try {
-          const resp = await data.client.listTools();
-          allTools.push(...resp.tools);
-        } catch (e) { logger.warn(`[Hub] Tool listing failed for ${name}`); }
-      }
-      return { tools: allTools };
-    });
-
-    this.mcpServer.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      const { name, arguments: args } = request.params;
-      for (const data of Object.values(this.backends)) {
-        try {
-          const { tools } = await data.client.listTools();
-          if (tools.some((t: any) => t.name === name)) {
-            return await data.client.callTool({ name, arguments: args });
-          }
-        } catch (e) { continue; }
-      }
-      throw new Error(`Tool ${name} not found across connected backends`);
-    });
-
-    // 3. Start listening
+    // 2. Start listening
     this.app.listen(PORT, () => {
       logger.info(`[Hub] Shared MCP Multiplexer V5 listening on port ${PORT}`);
       logger.info(`[Hub] Endpoint: http://localhost:${PORT}/hub`);
