@@ -5,10 +5,6 @@
       "httpUrl": "http://localhost:5115/hub",
       "trust": true
     }
-
-
-
-
   },
 
   "security": {
@@ -53,11 +49,7 @@
   },
   "context": {
     "loadMemoryFromIncludeDirectories": true,
-    "fileName": [
-      "CLAUDE.md",
-      "GEMINI.md",
-      "AGENTS.md"
-    ]
+    "fileName": ["CLAUDE.md", "GEMINI.md", "AGENTS.md"]
   },
   "tools": {
     "shell": {
