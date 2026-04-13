@@ -819,13 +819,13 @@ mcp_hub() {
 				log_warning "Shared MCP Hub is already running (PID: $(cat "$pid_file"))"
 				return 0
 			fi
-			log_info "Starting Shared MCP Hub V3..."
+			log_info "Starting Shared MCP Hub V4..."
 			(cd "$hub_dir" && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
 			
 			local count=0
 			while [ $count -lt 5 ]; do
 				if curl -s http://localhost:5115/status >/dev/null 2>&1; then
-					log_success "Shared MCP Hub V3 ACTIVE on http://localhost:5115"
+					log_success "Shared MCP Hub V4 ACTIVE on http://localhost:5115"
 					return 0
 				fi
 				sleep 1

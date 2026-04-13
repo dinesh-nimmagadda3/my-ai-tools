@@ -1,4 +1,4 @@
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -7,13 +7,13 @@ import {
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-const HUB_URL = process.env.HUB_URL || "http://localhost:5115/sse";
+const HUB_URL = process.env.HUB_URL || "http://localhost:5115/hub";
 
 async function runBridge() {
-  const clientTransport = new SSEClientTransport(new URL(HUB_URL));
+  const clientTransport = new StreamableHTTPClientTransport(new URL(HUB_URL));
   const hubClient = new Client({
     name: "mcp-bridge-client",
-    version: "1.0.0",
+    version: "4.0.0",
   }, {
     capabilities: {}
   });
@@ -22,7 +22,7 @@ async function runBridge() {
 
   const bridgeServer = new Server({
     name: "mcp-bridge-server",
-    version: "1.0.0",
+    version: "4.0.0",
   }, {
     capabilities: {
       tools: {},

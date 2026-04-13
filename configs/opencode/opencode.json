@@ -56,8 +56,9 @@
 		"hub": {
 			"enabled": true,
 			"type": "remote",
-			"url": "http://localhost:5115/sse"
+			"url": "http://localhost:5115/hub"
 		}
+
 
 
 

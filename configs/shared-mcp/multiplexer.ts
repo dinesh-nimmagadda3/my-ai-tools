@@ -1,15 +1,18 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
+  isInitializeRequest,
 } from "@modelcontextprotocol/sdk/types.js";
-import express, { Request, Response } from "express";
+import { Request, Response } from "express";
 import fs from "node:fs";
 import { pino } from "pino";
+import { randomUUID } from "node:crypto";
 
 const logger = pino({
   transport: {
@@ -19,7 +22,7 @@ const logger = pino({
 });
 
 const REGISTRY_PATH = "./server-registry.json";
-const PORT = process.env.PORT || 5115;
+const PORT = Number(process.env.PORT) || 5115;
 
 interface McpBackend {
   client: Client;
@@ -27,55 +30,87 @@ interface McpBackend {
   status: "connected" | "error";
 }
 
-class McpHubV3 {
+class McpHubV4 {
   private backends: Record<string, McpBackend> = {};
   private server: Server;
-  private app: express.Express;
-  private sseTransport?: SSEServerTransport;
+  private app: any; 
+  private transports: Map<string, StreamableHTTPServerTransport> = new Map();
 
   constructor() {
     this.server = new Server({
       name: "shared-mcp-hub",
-      version: "3.0.0",
+      version: "4.0.0",
     }, {
       capabilities: { tools: {}, resources: {}, prompts: {} }
     });
 
-    this.app = express();
-    this.app.use(express.json());
+    this.app = createMcpExpressApp();
     this.setupRoutes();
   }
 
   private setupRoutes() {
-    // Spec-compliant SSE
-    this.app.get("/sse", async (_req: Request, res: Response) => {
-      logger.info("[Hub] New client connection arriving at /sse");
-      this.sseTransport = new SSEServerTransport("/messages", res);
-      await this.server.connect(this.sseTransport);
-    });
+    // Unified V4 Hub Endpoint: POST (messages), GET (stream), DELETE (terminate)
+    const hubHandler = async (req: Request, res: Response) => {
+      const sessionId = req.headers["mcp-session-id"] as string;
 
-    this.app.post("/messages", async (req: Request, res: Response) => {
-      if (this.sseTransport) {
-        await this.sseTransport.handlePostMessage(req, res);
-      } else {
-        res.status(400).send("No active session");
+      try {
+        let transport: StreamableHTTPServerTransport | undefined;
+
+        if (sessionId && this.transports.has(sessionId)) {
+          transport = this.transports.get(sessionId);
+        } else if (!sessionId && req.method === "POST" && isInitializeRequest(req.body)) {
+          // New Session Initialization
+          logger.info("[Hub] Initializing new Hub session");
+          transport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: () => randomUUID(),
+            onsessioninitialized: (sid) => {
+              logger.info(`[Hub] Session initialized: ${sid}`);
+              if (transport) this.transports.set(sid, transport);
+            }
+          });
+
+          transport.onclose = () => {
+            if (transport?.sessionId) {
+              logger.info(`[Hub] Session closed: ${transport.sessionId}`);
+              this.transports.delete(transport.sessionId);
+            }
+          };
+
+          await this.server.connect(transport);
+          await transport.handleRequest(req, res, req.body);
+          return;
+        }
+
+        if (transport) {
+          await transport.handleRequest(req, res, req.body);
+        } else {
+          res.status(400).json({
+            jsonrpc: "2.0",
+            error: { code: -32000, message: "Invalid session or initialization required" },
+            id: null
+          });
+        }
+      } catch (err) {
+        logger.error(`[Hub] Transport error: ${err}`);
+        if (!res.headersSent) res.status(500).send("Internal Hub Error");
       }
-    });
+    };
 
-    // V3: Dynamic Registration
+    this.app.all("/hub", hubHandler);
+
+    // V3: Dynamic Registration (kept for flexibility)
     this.app.post("/register", async (req: Request, res: Response) => {
       const { name, config } = req.body;
       logger.info(`[Hub] Dynamic registration request for: ${name}`);
       try {
         await this.connectBackend(name, config);
-        // Optionally persist to registry
         res.status(200).json({ status: "ok", message: `Server ${name} registered` });
       } catch (err) {
         res.status(500).json({ status: "error", message: String(err) });
       }
     });
 
-    // V3: Health Dashboard
+    // V4: Health & Status Dashboard
     this.app.get("/status", (_req: Request, res: Response) => {
       const status = Object.entries(this.backends).map(([name, data]) => ({
         name,
@@ -85,7 +120,9 @@ class McpHubV3 {
       }));
       res.json({
         hub: "ACTIVE",
-        version: "3.0.0",
+        version: "4.0.0",
+        protocol: "Streamable HTTP",
+        activeSessions: this.transports.size,
         backends: status,
         uptime: process.uptime()
       });
@@ -101,12 +138,19 @@ class McpHubV3 {
         args: config.args,
         env: { ...process.env, ...config.env }
       });
-    } else if (config.type === "sse") {
-      transport = new SSEClientTransport(new URL(config.url));
+    } else if (config.type === "sse" || config.type === "http") {
+      // Use modern transport if it's likely a new server, fallback to SSE patterns if it ends in /sse
+      if (config.url.endsWith("/sse")) {
+         // This is technically deprecated but kept until backends migrate
+         const { SSEClientTransport } = await import("@modelcontextprotocol/sdk/client/sse.js");
+         transport = new SSEClientTransport(new URL(config.url));
+      } else {
+         transport = new StreamableHTTPClientTransport(new URL(config.url));
+      }
     }
 
     if (transport) {
-      const client = new Client({ name: "hub-proxy", version: "1.0.0" }, { capabilities: {} });
+      const client = new Client({ name: "hub-proxy", version: "4.0.0" }, { capabilities: {} });
       await client.connect(transport);
       this.backends[name] = { client, config, status: "connected" };
       logger.info(`[Hub] Successfully aggregated backend: ${name}`);
@@ -151,18 +195,19 @@ class McpHubV3 {
 
     // 3. Start listening
     this.app.listen(PORT, () => {
-      logger.info(`[Hub] Shared MCP Multiplexer listening on port ${PORT}`);
+      logger.info(`[Hub] Shared MCP Multiplexer V4 listening on port ${PORT}`);
+      logger.info(`[Hub] Endpoint: http://localhost:${PORT}/hub`);
       logger.info(`[Hub] Health Dashboard: http://localhost:${PORT}/status`);
     });
   }
 }
 
-const hub = new McpHubV3();
+const hub = new McpHubV4();
 hub.start().catch((err: Error) => logger.error(err));
 
 // Graceful exit
 process.on("SIGTERM", () => {
   logger.info("[Hub] SIGTERM received. Closing hub...");
-  // TODO: Close all backend transports
   process.exit(0);
 });
+
