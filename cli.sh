@@ -1028,9 +1028,8 @@ mcp-hub() {
 			local unit_src="$SCRIPT_DIR/configs/shared-mcp/shared-mcp-pod.service"
 			local unit_dest="$HOME/.config/systemd/user/shared-mcp.service"
 			
-			# Adjust paths in unit file
-			sed -e "s|%h/projects/my-ai-tools|$SCRIPT_DIR|g" \
-			    -e "s|%h|$HOME|g" "$unit_src" > "$unit_dest"
+			# Substitute variables in unit file
+			sed "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" "$unit_src" > "$unit_dest"
 			
 			systemctl --user daemon-reload
 			systemctl --user enable shared-mcp.service

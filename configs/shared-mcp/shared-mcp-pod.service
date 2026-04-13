@@ -6,14 +6,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-Environment=PODMAN_KUBE_DIR=%h/projects/my-ai-tools/configs/shared-mcp
-# Clean up any existing pod of the same name before play
-ExecStartPre=-/usr/bin/podman kube down ${PODMAN_KUBE_DIR}/hub-pod.yaml
-# Use kube play to start the pod defined in the YAML
-ExecStart=/usr/bin/podman kube play --network bridge --publish 5115:5115 ${PODMAN_KUBE_DIR}/hub-pod.yaml
-# Down on stop
-ExecStop=/usr/bin/podman kube down ${PODMAN_KUBE_DIR}/hub-pod.yaml
-# Restart policy for extreme persistence
+# We use absolute paths substituted by cli.sh to avoid systemd variable expansion issues
+ExecStartPre=-/usr/bin/podman kube down $REPLACE_WITH_PROJECT_DIR/configs/shared-mcp/hub-pod.yaml
+# We rely on the hostPort definition inside hub-pod.yaml instead of --publish
+ExecStart=/usr/bin/podman kube play --network bridge $REPLACE_WITH_PROJECT_DIR/configs/shared-mcp/hub-pod.yaml
+ExecStop=/usr/bin/podman kube down $REPLACE_WITH_PROJECT_DIR/configs/shared-mcp/hub-pod.yaml
 Restart=always
 RestartSec=10
 
