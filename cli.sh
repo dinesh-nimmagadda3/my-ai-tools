@@ -900,10 +900,6 @@ validate_all_configs() {
 		log_error "Claude Code settings.json failed validation"
 		config_validation_failed=true
 	fi
-	if ! validate_config "$SCRIPT_DIR/configs/claude/mcp-servers.json"; then
-		log_error "Claude Code mcp-servers.json failed validation"
-		config_validation_failed=true
-	fi
 
 	# Validate OpenCode config
 	if [ -f "$SCRIPT_DIR/configs/opencode/opencode.json" ]; then
@@ -1007,14 +1003,11 @@ copy_opencode_configs() {
 	execute_quoted mkdir -p "$HOME/.config/opencode"
 	execute_quoted cp "$SCRIPT_DIR/configs/opencode/opencode.json" "$HOME/.config/opencode/"
 
-	execute_quoted rm -rf "$HOME/.config/opencode/agent"
-	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agent" "$HOME/.config/opencode/agent"
+	execute_quoted rm -rf "$HOME/.config/opencode/agents"
+	safe_copy_dir "$SCRIPT_DIR/configs/opencode/agents" "$HOME/.config/opencode/agents"
 
-	execute_quoted rm -rf "$HOME/.config/opencode/command"
-	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/command" "$HOME/.config/opencode/command"
-
-	execute_quoted rm -rf "$HOME/.config/opencode/skills"
-	copy_skills "$SCRIPT_DIR/skills" "$HOME/.config/opencode/skills"
+	execute_quoted rm -rf "$HOME/.config/opencode/commands"
+	copy_opencode_commands "$SCRIPT_DIR/configs/opencode/commands" "$HOME/.config/opencode/commands"
 
 	log_success "OpenCode configs copied"
 }
@@ -1116,9 +1109,6 @@ copy_gemini_configs() {
 	execute_quoted mkdir -p "$HOME/.gemini/policies"
 	safe_copy_dir "$SCRIPT_DIR/configs/gemini/policies" "$HOME/.gemini/policies"
 
-	execute_quoted rm -rf "$HOME/.gemini/skills"
-	copy_skills "$SCRIPT_DIR/configs/gemini/skills" "$HOME/.gemini/skills"
-
 	log_success "Gemini CLI configs copied"
 }
 
@@ -1161,8 +1151,6 @@ copy_pi_configs() {
 
 	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
 
-	copy_skills "$SCRIPT_DIR/configs/pi/skills" "$HOME/.pi/agent/skills"
-
 	log_success "Pi configs copied"
 }
 
@@ -1204,12 +1192,6 @@ copy_cursor_configs() {
 		execute_quoted cp "$SCRIPT_DIR/configs/cursor/mcp.json" "$HOME/.cursor/mcp.json"
 		log_success "Cursor MCP config copied"
 	fi
-
-	execute_quoted rm -rf "$HOME/.cursor/skills"
-	copy_skills "$SCRIPT_DIR/configs/cursor/skills" "$HOME/.cursor/skills"
-
-	execute_quoted rm -rf "$HOME/.cursor/commands"
-	safe_copy_dir "$SCRIPT_DIR/configs/cursor/commands" "$HOME/.cursor/commands"
 
 	log_success "Cursor configs copied"
 }

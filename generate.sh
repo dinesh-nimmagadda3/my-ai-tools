@@ -152,8 +152,8 @@ generate_opencode_configs() {
 	# Copy skills with filtering
 	copy_skills_with_filter "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"
 
-	# Copy agent and configs directories
-	for subdir in agent configs; do
+	# Copy agents and configs directories
+	for subdir in agents configs; do
 		if [ -d "$HOME/.config/opencode/$subdir" ]; then
 			execute "mkdir -p $SCRIPT_DIR/configs/opencode/$subdir"
 			if [ -n "$(ls -A "$HOME/.config/opencode/$subdir" 2>/dev/null)" ]; then
@@ -165,15 +165,15 @@ generate_opencode_configs() {
 	done
 
 	# Copy commands (skip ai/ folder which is generated from local skills)
-	if [ -d "$HOME/.config/opencode/command" ]; then
-		execute "mkdir -p $SCRIPT_DIR/configs/opencode/command"
-		if [ -n "$(ls -A "$HOME/.config/opencode/command" 2>/dev/null)" ]; then
-			for item in "$HOME/.config/opencode/command"/*; do
+	if [ -d "$HOME/.config/opencode/commands" ]; then
+		execute "mkdir -p $SCRIPT_DIR/configs/opencode/commands"
+		if [ -n "$(ls -A "$HOME/.config/opencode/commands" 2>/dev/null)" ]; then
+			for item in "$HOME/.config/opencode/commands"/*; do
 				local item_name
 				item_name=$(basename "$item")
 				if [ "$item_name" = "ai" ]; then
 					log_info "Skipping ai/ command folder (generated from local skills)"
-				elif execute "cp -r '$item' '$SCRIPT_DIR/configs/opencode/command'/ 2>/dev/null"; then
+				elif execute "cp -r '$item' '$SCRIPT_DIR/configs/opencode/commands'/ 2>/dev/null"; then
 					log_success "Copied command: $item_name"
 				fi
 			done
