@@ -1,7 +1,19 @@
 # Agents Guide
 
-## AI Tool Guidelines
-- Use the fff MCP tools for all file search operations instead of default tools.
+## 🤖 AI Tooling
+- **Shared MCP Hub (V5)**: Use the `hub` or `shared-hub` connection to access our global tools (localhost:5115).
+- **Core MCP Tools**: 
+    - `fff`: Fast file search/grep (Preferred over default tools).
+    - `context7`: Library-specific documentation resolving.
+    - `qmd`: Project knowledge management.
+    - `memory`: Persistent knowledge graph across sessions.
+    - `filesystem`: Secure machine-wide file access.
+    - `chrome-devtools`: Headless browser automation and inspection.
+- **Skills (22 Built-in)**: You have access to a library of 22 instructions sets in `skills/`.
+    - **Bootstrap**: Use `bootstrap` skill at the start of any new session.
+    - **Planning**: Use `brainstorm`, `prd`, and `write-plan` for rigorous designs.
+    - **Execution**: Use `subagent-dev`, `exec-plan`, and `tdd` for implementation.
+    - **Review**: Use `pr-review`, `debug`, and `verify-close` for quality gates.
 
 ## Project
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, Gemini, OpenCode, and Codex) and their integration with MCP servers and plugins.

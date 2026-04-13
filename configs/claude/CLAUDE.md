@@ -1,8 +1,12 @@
 # 🤖 Claude Code Agent Guidelines
 
-## AI Tool Guidelines
-- Use the **fff** MCP tool (via Shared Hub) for all file search operations instead of default tools.
-- Use the **shared-hub** MCP connection for all tool access (context7, qmd, fff, sequential-thinking).
+## 🛠️ AI Tooling
+- **Shared Hub (V5)**: Use the `shared-hub` or `hub` connection (localhost:5115) to access all tools.
+- **MCP Servers**: Use `fff` (search), `context7` (docs), `qmd` (knowledge), `memory` (graph), `filesystem` (access), and `chrome-devtools` (browser).
+- **Skills (22 Built-in)**: Check `skills/` for instruction sets.
+    - **MANDATORY**: Use the `bootstrap` skill at the start of any new mission or session.
+    - **Workflow**: Follow `brainstorm` → `write-plan` → `subagent-dev` for major features.
+    - **Quality**: Always use `verify-close` before claiming a task is done.
 
 ## General Practices
 - Follow my software development practice @~/.ai-tools/best-practices.md
