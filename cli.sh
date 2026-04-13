@@ -943,8 +943,8 @@ ensure_hub_running() {
 mcp_hub() {
 	local action="$1"
 	local hub_dir="$HOME/.ai-tools/shared-mcp"
-	local pid_file="/tmp/shared-mcp-hub.pid"
-	local log_file="/tmp/shared-mcp-hub.log"
+	local pid_file="$hub_dir/hub.pid"
+	local log_file="$hub_dir/hub.log"
 	
 	case "$action" in
 		start)
@@ -952,7 +952,7 @@ mcp_hub() {
 				log_warning "Shared MCP Hub is already running (PID: $(cat "$pid_file"))"
 				return 0
 			fi
-			log_info "Starting Shared MCP Hub V4..."
+			log_info "Starting Shared MCP Hub V5..."
 			if [ "$DRY_RUN" = true ]; then
 				log_info "[DRY RUN] (cd $hub_dir && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
 				return 0
@@ -963,7 +963,7 @@ mcp_hub() {
 			while [ $count -lt 5 ]; do
 
 				if curl -s http://localhost:5115/status >/dev/null 2>&1; then
-					log_success "Shared MCP Hub V4 ACTIVE on http://localhost:5115"
+					log_success "Shared MCP Hub V5 ACTIVE on http://localhost:5115"
 					return 0
 				fi
 				sleep 1

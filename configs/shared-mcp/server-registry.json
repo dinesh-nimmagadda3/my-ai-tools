@@ -2,15 +2,15 @@
   "mcpServers": {
     "qmd": {
       "type": "stdio",
-      "command": "qmd",
-      "args": ["mcp"],
+      "command": "npx",
+      "args": ["-y", "qmd", "mcp"],
       "shared": true,
       "enabled": true
     },
     "fff": {
       "type": "stdio",
-      "command": "fff-mcp",
-      "args": [],
+      "command": "npx",
+      "args": ["-y", "fff-mcp"],
       "shared": true,
       "enabled": true
     },
