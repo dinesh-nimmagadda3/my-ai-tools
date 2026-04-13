@@ -2,7 +2,7 @@
 name: qmd-knowledge
 description: Project-specific knowledge management system using qmd MCP server. Captures learnings, issue notes, and conventions in a searchable knowledge base.
 license: MIT
-compatibility: opencode, claude, amp, codex, gemini, cursor, pi
+compatibility: claude, opencode, codex, gemini
 hint: Use when recording or retrieving project knowledge, learnings, and issue notes
 user-invocable: true
 metadata:
@@ -32,7 +32,7 @@ This skill provides a unified knowledge management system. You install the skill
 
 ```
 # The qmd-knowledge skill (installed to your AI tool's skills directory)
-# Location varies by tool: ~/.config/opencode/skill/, ~/.claude/skills/, or ~/.config/amp/skills/
+# Location varies by tool: ~/.config/opencode/skill/ or ~/.claude/skills/
 ├── SKILL.md              # This file - the skill definition
 ├── scripts/              # Executable scripts
 │   └── record.sh         # Record learnings/issues/notes
@@ -126,10 +126,9 @@ command -v git || echo "Install git for automatic project name detection"
    # The skill is installed to your AI tool's skills directory:
    # - OpenCode: ~/.config/opencode/skill/qmd-knowledge/
    # - Claude Code: ~/.claude/skills/qmd-knowledge/
-   # - Amp: ~/.config/amp/skills/qmd-knowledge/
    ```
 
-3. **Configure MCP server** (see installation docs for Claude/OpenCode/Amp)
+3. **Configure MCP server** (see installation docs for Claude/OpenCode)
 
 4. **Create a knowledge collection for your project**:
 

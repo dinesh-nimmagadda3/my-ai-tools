@@ -38,15 +38,6 @@ configs/
 │   ├── agent/           # Custom agents
 │   └── command/         # Custom commands
 │
-├── amp/                 # Amp (Modular) settings
-│   ├── settings.json    # Main settings
-│   └── AGENTS.md        # Agent guidelines
-│
-├── ccs/                 # Claude Code Switch
-│   ├── config.yaml      # Main configuration
-│   ├── delegation-sessions.json
-│   └── hooks/           # CCS-specific hooks
-│
 ├── codex/               # OpenAI Codex CLI
 │   ├── config.json      # Main config
 │   ├── config.toml      # Alternative format
@@ -59,22 +50,6 @@ configs/
 │   ├── policies/        # Tool policies (.toml)
 │   ├── GEMINI.md        # Main guidelines
 │   └── AGENTS.md        # Additional guidelines
-│
-├── cursor/              # Cursor Agent CLI
-│   └── AGENTS.md        # Agent guidelines
-│
-├── factory/             # Factory Droid
-│   ├── AGENTS.md        # Global guidelines
-│   ├── mcp.json         # MCP configuration
-│   ├── settings.json    # Settings
-│   └── droids/          # Custom droid definitions
-│
-├── copilot/             # GitHub Copilot CLI
-│   ├── AGENTS.md        # Agent guidelines
-│   └── mcp-config.json  # MCP config
-│
-├── ai-launcher/         # AI Launcher
-│   └── config.json      # Main config
 │
 ├── best-practices.md    # Developer best practices
 └── git-guidelines.md    # Git safety guidelines
@@ -147,9 +122,8 @@ docs/
 |----------|-----------------|----------------|
 | Claude Code | `configs/claude/` | `~/.claude/` |
 | OpenCode | `configs/opencode/` | `~/.config/opencode/` |
-| Amp | `configs/amp/` | `~/.config/amp/` |
-| CCS | `configs/ccs/` | `~/.ccs/` |
 | Gemini CLI | `configs/gemini/` | `~/.gemini/` |
+| Codex CLI | `configs/codex/` | `~/.codex/` |
 | Best Practices | `configs/best-practices.md` | `~/.ai-tools/best-practices.md` |
 | Git Guidelines | `configs/git-guidelines.md` | `~/.ai-tools/git-guidelines.md` |
 
@@ -173,8 +147,6 @@ Custom slash commands as Markdown files:
 
 ```
 configs/claude/commands/
-├── ccs/           # CCS delegation
-├── ccs.md         # CCS command
 ├── ultrathink.md  # Deep thinking mode
 └── ...            # Other commands
 ```
@@ -194,8 +166,7 @@ configs/claude/agents/
 
 ## Configuration File Formats
 
-- **JSON**: Claude, OpenCode, Amp settings, MCP servers
-- **YAML**: CCS configuration
+- **JSON**: Claude, OpenCode settings, MCP servers
 - **Markdown**: Commands, agents, skills, guidelines
 - **TOML**: Gemini CLI commands, Codex config
 - **Shell**: Scripts, hooks (bash/TypeScript)

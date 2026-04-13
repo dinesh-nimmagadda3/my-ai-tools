@@ -70,16 +70,6 @@ The MCP server configuration is already included in this repository.
 }
 ```
 
-**For Amp** (`~/.config/amp/settings.json`):
-```json
-{
-  "amp.mcpServers": {
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"]
-    }
-  }
-}
 ```
 
 ### 3. Install the Skill
@@ -161,7 +151,7 @@ This appends to `references/issues/123.md` (creating it if it doesn't exist).
 
 ### Querying Knowledge
 
-#### From Claude or OpenCode
+#### From Claude, OpenCode, Codex, or Gemini
 
 When qmd MCP server is configured, Claude can autonomously search the knowledge base:
 
@@ -339,8 +329,8 @@ qmd embed
 ### MCP server not working
 
 1. Check that qmd is in your PATH: `which qmd`
-2. Verify MCP server config in `~/.claude/mcp-servers.json` or `~/.config/amp/settings.json`
-3. Restart Claude Code or Amp
+2. Verify MCP server config in `~/.claude/mcp-servers.json` or tool-specific settings
+3. Restart your AI tool
 
 ### Embeddings not updating
 

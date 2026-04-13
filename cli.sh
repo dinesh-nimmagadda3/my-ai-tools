@@ -786,6 +786,8 @@ install_gemini() {
 
 
 
+
+
 # Helper: Copy skills from source to destination
 # Usage: copy_skills "source_dir" "dest_dir"
 copy_skills() {
@@ -880,13 +882,8 @@ copy_configurations() {
 
 	copy_claude_configs
 	copy_opencode_configs
-	copy_amp_configs
-	copy_ai_launcher_configs
 	copy_codex_configs
 	copy_gemini_configs
-	copy_copilot_configs
-	copy_cursor_configs
-	copy_factory_configs
 	copy_best_practices
 }
 
@@ -916,11 +913,8 @@ validate_all_configs() {
 	fi
 
 	# Validate other tool configs
-	for config_file in "$SCRIPT_DIR/configs/amp/settings.json" \
-		"$SCRIPT_DIR/configs/ai-launcher/config.json" \
-		"$SCRIPT_DIR/configs/codex/config.json" \
-		"$SCRIPT_DIR/configs/gemini/settings.json" \
-		"$SCRIPT_DIR/configs/factory/settings.json"; do
+	for config_file in "$SCRIPT_DIR/configs/codex/config.json" \
+		"$SCRIPT_DIR/configs/gemini/settings.json"; do
 		if [ -f "$config_file" ] && ! validate_config "$config_file"; then
 			log_error "Config validation failed: $config_file"
 			config_validation_failed=true
@@ -1025,49 +1019,6 @@ copy_opencode_configs() {
 	log_success "OpenCode configs copied"
 }
 
-copy_amp_configs() {
-	local amp_status
-	amp_status=$(detect_tool --detailed "amp" "$HOME/.config/amp") || amp_status="missing"
-	if [ "$amp_status" = "missing" ]; then
-		log_info "Amp not detected - skipping Amp config installation"
-		return 0
-	fi
-
-	log_info "Detected Amp (via $amp_status)"
-	execute_quoted mkdir -p "$HOME/.config/amp"
-	execute_quoted cp "$SCRIPT_DIR/configs/amp/settings.json" "$HOME/.config/amp/"
-
-	copy_skills "$SCRIPT_DIR/configs/amp/skills" "$HOME/.config/amp/skills"
-
-	if [ -f "$SCRIPT_DIR/configs/amp/AGENTS.md" ]; then
-		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/amp/"
-		if [ -f "$HOME/.config/AGENTS.md" ]; then
-			execute_quoted cp "$HOME/.config/AGENTS.md" "$HOME/.config/AGENTS.md.bak"
-			log_warning "Backed up existing AGENTS.md to .bak"
-		fi
-		execute_quoted cp "$SCRIPT_DIR/configs/amp/AGENTS.md" "$HOME/.config/AGENTS.md"
-	fi
-
-	log_success "Amp configs copied"
-}
-
-copy_ai_launcher_configs() {
-	local ai_launcher_status
-	ai_launcher_status=$(detect_tool --detailed "ai-launcher" "$HOME/.config/ai-launcher" "$HOME/.config/ai-launcher/config.json") || ai_launcher_status="missing"
-	if [ "$ai_launcher_status" = "missing" ]; then
-		log_info "ai-launcher not detected - skipping ai-launcher config installation"
-		return 0
-	fi
-
-	log_info "Detected ai-launcher (via $ai_launcher_status)"
-	execute_quoted mkdir -p "$HOME/.config/ai-launcher"
-	if copy_config_file "$SCRIPT_DIR/configs/ai-launcher/config.json" "$HOME/.config/ai-launcher"; then
-		log_success "ai-launcher configs copied"
-	else
-		log_info "ai-launcher config not found in source, preserving existing"
-	fi
-}
-
 copy_codex_configs() {
 	local codex_status
 	codex_status=$(detect_tool --detailed "codex" "$HOME/.codex") || codex_status="missing"
@@ -1123,72 +1074,6 @@ copy_gemini_configs() {
 	safe_copy_dir "$SCRIPT_DIR/configs/gemini/policies" "$HOME/.gemini/policies"
 
 	log_success "Gemini CLI configs copied"
-}
-
-
-
-copy_copilot_configs() {
-	if [ ! -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ] && [ ! -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
-		return 0
-	fi
-
-	execute_quoted mkdir -p "$HOME/.copilot"
-
-	if [ -f "$SCRIPT_DIR/configs/copilot/AGENTS.md" ]; then
-		execute_quoted cp "$SCRIPT_DIR/configs/copilot/AGENTS.md" "$HOME/.copilot/copilot-instructions.md"
-		log_success "GitHub Copilot CLI configs copied"
-	fi
-
-	if [ -f "$SCRIPT_DIR/configs/copilot/mcp-config.json" ]; then
-		execute_quoted cp "$SCRIPT_DIR/configs/copilot/mcp-config.json" "$HOME/.copilot/mcp-config.json"
-		log_success "GitHub Copilot MCP config copied"
-	fi
-}
-
-copy_cursor_configs() {
-	local cursor_status
-	cursor_status=$(detect_tool --detailed "agent" "$HOME/.cursor") || cursor_status="missing"
-	if [ "$cursor_status" = "missing" ]; then
-		log_info "Cursor not detected - skipping Cursor config installation"
-		return 0
-	fi
-
-	log_info "Detected Cursor (via $cursor_status)"
-
-	if [ -f "$SCRIPT_DIR/configs/cursor/AGENTS.md" ]; then
-		execute_quoted mkdir -p "$HOME/.cursor/rules"
-		execute_quoted cp "$SCRIPT_DIR/configs/cursor/AGENTS.md" "$HOME/.cursor/rules/general.mdc"
-		log_success "Cursor Agent CLI configs copied"
-	fi
-
-	if [ -f "$SCRIPT_DIR/configs/cursor/mcp.json" ]; then
-		execute_quoted cp "$SCRIPT_DIR/configs/cursor/mcp.json" "$HOME/.cursor/mcp.json"
-		log_success "Cursor MCP config copied"
-	fi
-
-	log_success "Cursor configs copied"
-}
-
-copy_factory_configs() {
-	local factory_status
-	factory_status=$(detect_tool --detailed "droid" "$HOME/.factory") || factory_status="missing"
-	if [ "$factory_status" = "missing" ]; then
-		log_info "Factory Droid not detected - skipping Factory Droid config installation"
-		return 0
-	fi
-
-	log_info "Detected Factory Droid (via $factory_status)"
-	execute_quoted mkdir -p "$HOME/.factory/droids"
-
-	copy_config_file "$SCRIPT_DIR/configs/factory/AGENTS.md" "$HOME/.factory/" || true
-	copy_config_file "$SCRIPT_DIR/configs/factory/mcp.json" "$HOME/.factory/" || true
-	copy_config_file "$SCRIPT_DIR/configs/factory/settings.json" "$HOME/.factory/" || true
-
-	if [ -d "$SCRIPT_DIR/configs/factory/droids" ] && [ -n "$(ls -A "$SCRIPT_DIR/configs/factory/droids" 2>/dev/null)" ]; then
-		safe_copy_dir "$SCRIPT_DIR/configs/factory/droids" "$HOME/.factory/droids"
-	fi
-
-	log_success "Factory Droid configs copied"
 }
 
 copy_best_practices() {
@@ -1316,10 +1201,8 @@ cleanup_duplicate_skills() {
 	local -a target_dirs=(
 		"$CLAUDE_SKILLS_DIR"
 		"$OPENCODE_SKILL_DIR"
-		"$AMP_SKILLS_DIR"
 		"$CODEX_SKILLS_DIR"
 		"$GEMINI_SKILLS_DIR"
-		"$CURSOR_SKILLS_DIR"
 	)
 
 	for target_dir in "${target_dirs[@]}"; do
@@ -1357,7 +1240,7 @@ install_cli_dependency() {
 	local name="$1"
 
 	case "$name" in
-	plannotator | plannotator-copilot)
+	plannotator)
 		if command -v plannotator &>/dev/null; then
 			return 0
 		fi
@@ -1452,18 +1335,14 @@ install_local_skills() {
 	# Define target directories
 	CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 	OPENCODE_SKILL_DIR="$HOME/.config/opencode/skills"
-	AMP_SKILLS_DIR="$HOME/.config/amp/skills"
 	CODEX_SKILLS_DIR="$HOME/.agents/skills"
 	GEMINI_SKILLS_DIR="$HOME/.gemini/skills"
-	CURSOR_SKILLS_DIR="$HOME/.cursor/skills"
 
 	# Prepare target directories
 	prepare_skills_dir "$CLAUDE_SKILLS_DIR"
 	prepare_skills_dir "$OPENCODE_SKILL_DIR"
-	prepare_skills_dir "$AMP_SKILLS_DIR"
 	prepare_skills_dir "$CODEX_SKILLS_DIR"
 	prepare_skills_dir "$GEMINI_SKILLS_DIR"
-	prepare_skills_dir "$CURSOR_SKILLS_DIR"
 
 	# Copy all skills from skills folder to targets
 	for skill_dir in "$SCRIPT_DIR/skills"/*; do
@@ -1540,22 +1419,6 @@ copy_skill_to_targets() {
 		log_info "Skipped $skill_name for OpenCode (not compatible)"
 	fi
 
-	if skill_is_compatible_with "$skill_dir" "amp"; then
-		safe_copy_dir "$skill_dir" "$AMP_SKILLS_DIR/$skill_name"
-		execute_quoted touch "$AMP_SKILLS_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to Amp"
-	else
-		log_info "Skipped $skill_name for Amp (not compatible)"
-	fi
-
-	if skill_is_compatible_with "$skill_dir" "codex"; then
-		safe_copy_dir "$skill_dir" "$CODEX_SKILLS_DIR/$skill_name"
-		execute_quoted touch "$CODEX_SKILLS_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to Codex CLI"
-	else
-		log_info "Skipped $skill_name for Codex CLI (not compatible)"
-	fi
-
 	if skill_is_compatible_with "$skill_dir" "gemini"; then
 		safe_copy_dir "$skill_dir" "$GEMINI_SKILLS_DIR/$skill_name"
 		execute_quoted touch "$GEMINI_SKILLS_DIR/$skill_name/$managed_marker"
@@ -1563,23 +1426,12 @@ copy_skill_to_targets() {
 	else
 		log_info "Skipped $skill_name for Gemini CLI (not compatible)"
 	fi
-
-	if skill_is_compatible_with "$skill_dir" "cursor"; then
-		safe_copy_dir "$skill_dir" "$CURSOR_SKILLS_DIR/$skill_name"
-		execute_quoted touch "$CURSOR_SKILLS_DIR/$skill_name/$managed_marker"
-		log_success "Copied $skill_name to Cursor"
-	else
-		log_info "Skipped $skill_name for Cursor (not compatible)"
-	fi
-
-
 }
 
 main() {
 	echo "╔══════════════════════════════════════════════════════════════════════╗"
 	echo "║                        AI Tools Setup                                ║"
-	echo "║  Claude • OpenCode • Amp • CCS • Codex • Gemini                      ║"
-	echo "║  Copilot • Cursor • Factory Droid                                    ║"
+	echo "║  Claude • Gemini • OpenCode • Codex                                  ║"
 	echo "╚══════════════════════════════════════════════════════════════════════╝"
 	echo
 
@@ -1617,8 +1469,6 @@ main() {
 
 	install_gemini
 	echo
-
-
 
 	echo
 

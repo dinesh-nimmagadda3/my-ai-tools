@@ -1,6 +1,6 @@
 # Welcome to my-ai-tools 👋
 
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Codex, and Gemini CLI with custom configurations, MCP servers, skills, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, Gemini CLI, OpenCode, and Codex with custom configurations, MCP servers, skills, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -8,7 +8,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Codex, and Gemini CLI
+- 🤖 **Multiple AI tools** - Claude Code, Gemini CLI, OpenCode, and Codex
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -433,23 +433,6 @@ Prevents dangerous git commands from being executed:
 
 The implementation can be found in `configs/claude/hooks/index.ts` and `configs/claude/hooks/git-guard.ts`.
 
-##### WebSearch Transformer
-
-Transform WebSearch queries:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
-            "timeout": 120
-          }
-        ]
       }
     ]
   }
@@ -479,7 +462,6 @@ Using claude-hud plugin:
 
 Located in [`configs/claude/commands/`](configs/claude/commands/):
 
-- `/ccs` - CCS delegation and profile management
 - `/plannotator-review` - Interactive code review
 - `/ultrathink` - Deep thinking mode
 
@@ -517,16 +499,16 @@ Real-world projects built using these AI tools:
 | Project                                                             | Description                                                                     | Tools Used                                  |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
 | - [Oak](https://github.com/jellydn/oak)                             | Lightweight macOS focus companion for deep work with notch-first UI             | Ralph + OpenCode + Codex GPT 5.2            |
-| - [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback                | Ralph + OpenCode + GLM + Amp/Codex (review) |
+| - [Prosody](https://github.com/jellydn/prosody)                     | Mobile app for English speaking rhythm coaching with AI feedback                | Ralph + OpenCode + GLM + Codex (review)     |
 | - [Keybinder](https://github.com/jellydn/keybinder)                 | macOS app for managing skhd keyboard shortcuts                                  | Claude + spec-kit                           |
-| - [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review                                    | Amp + Ralph                                 |
+| - [SealCode](https://github.com/jellydn/vscode-seal-code)           | VS Code extension for AI-powered code review                                    | Ralph + OpenCode                            |
 | - [Ralph](https://github.com/jellydn/ralph)                         | Autonomous AI agent loop for PRD-driven development                             | TypeScript                                  |
 | - [AI Launcher](https://github.com/jellydn/ai-launcher)             | Fast launcher for switching between AI coding assistants                        | TypeScript                                  |
 | - [Tiny Coding Agent](https://github.com/jellydn/tiny-coding-agent) | Minimal coding agent focused on simplicity                                      | TypeScript                                  |
 | - [dotenv-tui](https://github.com/jellydn/dotenv-tui)               | Terminal UI for managing `.env` files across projects                           | Go + Bubble Tea                             |
 | - [tiny-cloak.nvim](https://github.com/jellydn/tiny-cloak.nvim)     | Neovim plugin that masks sensitive data in `.env` files                         | Lua + Neovim                                |
 | - [tiny-term.nvim](https://github.com/jellydn/tiny-term.nvim)       | Minimal terminal plugin for Neovim 0.11+                                        | Lua + Neovim                                |
-| - [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                                        | OpenCode + GLM 4.7 + Amp + Codex CLI        |
+| - [Sky Alert](https://github.com/jellydn/sky-alert)                 | Real-time flight monitoring Telegram bot                                        | OpenCode + GLM 4.7 + Codex CLI              |
 | - [Docklight](https://github.com/jellydn/docklight)                 | Minimal, self-hosted web UI for managing a single-node Dokku server             | Ralph + OpenCode                            |
 | - [Little Writing](https://github.com/jellydn/little-writing)       | A handwriting tracing app for kids built with React, react-konva, and Capacitor | Claude + spec-kit + GLM 5                   |
 
@@ -573,9 +555,7 @@ Local marketplace plugins are in [`skills/`](skills/).
 
 - **OpusPlan Mode**: Use opusplan mode to plan with Opus and implement with Sonnet, then use Plannotator to review plans
 - **Session Management**: Disable auto-compact in settings. Monitor context usage with `claude-hud`. Press `Ctrl+C` to quit or `/clear` to reset between coding sessions. Create a plan with `/handoffs` and resume with `/pickup` when approaching 90% context limit on big tasks.
-- **Git Worktree**: Use git worktree with `try` CLI. For tmux users, use `claude-squash` to manage sessions efficiently. Use [superset.sh](https://superset.sh/) to run multiple AI agents in parallel across worktrees
 - **Neovim Integration**: Check out [tiny-nvim](https://github.com/jellydn/tiny-nvim) for a complete setup with [sidekick.nvim](https://github.com/folke/sidekick.nvim) or [claudecode.nvim](https://github.com/coder/claudecode.nvim)
-- **Cost Optimization**: Use [CCS](https://ccs.kaitran.ca/) to switch between affordable providers.
 
 ---
 
@@ -956,8 +936,6 @@ Copy the file to your preferred location and reference it in your AI tools.
 - [Claude Code Documentation](https://claude.com/claude-code) - Official docs
 - [OpenCode Documentation](https://opencode.ai/docs) - Guide with agents and skills
 - [MCP Servers Directory](https://mcp.so) - Model Context Protocol servers
-- [Context7 Documentation](https://context7.com/docs) - Library documentation lookup
-- [CCS Documentation](https://github.com/kaitranntt/ccs) - Claude Code Switch
 - [Claude Code Showcase](https://github.com/ChrisWiles/claude-code-showcase) - Community examples
 - [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) - Production configs
 - [Claude Code Best Practice](https://github.com/shanraisshan/claude-code-best-practice) - Best practices and tips for Claude Code

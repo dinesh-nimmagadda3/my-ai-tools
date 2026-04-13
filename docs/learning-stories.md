@@ -36,12 +36,12 @@ Used **spec-kit** for specification-driven development:
 
 - **Repository:** [jellydn/vscode-seal-code](https://github.com/jellydn/vscode-seal-code)
 - **Marketplace:** [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=jellydn.seal-code)
-- **Built with:** [Amp](https://ampcode.com/) + [Ralph](https://github.com/snarktank/ralph)
+- **Built with:** [Claude](https://claude.com/product/claude-code)
 - **Tech Stack:** TypeScript, VS Code Extension API, reactive-vscode
 
 ### Features
 
-- **AI-Powered Review** - Send comments to Claude, Copilot, OpenCode, or Amp
+- **AI-Powered Review** - Send comments to Claude, OpenCode, or Codex
 - **Prompt Templates** - Built-in templates for review, security, refactor workflows
 - **Categorized Comments** - Bug, Question, Suggestion, Nitpick, Note
 - **Rich Visual Feedback** - Inline decorations, gutter icons, line backgrounds
@@ -49,36 +49,12 @@ Used **spec-kit** for specification-driven development:
 
 ### Development Approach
 
-Built autonomously using **Ralph** (AI agent system) with **Amp** as the coding assistant:
-
 - PRD-driven development with task decomposition
 - Autonomous implementation of extension features
 - Integrated testing and quality validation
 
 ---
 
-## Ralph
-
-**Autonomous AI agent loop for PRD-driven development.**
-
-- **Repository:** [jellydn/ralph](https://github.com/jellydn/ralph)
-- **Upstream:** [snarktank/ralph](https://github.com/snarktank/ralph)
-- **Status:** Temporary fork pending upstream PRs ([#6](https://github.com/snarktank/ralph/pull/6), [#21](https://github.com/snarktank/ralph/pull/21))
-- **Tech Stack:** TypeScript, Shell, JavaScript
-
-Minimal Ralph implementation: PRD → task decomposition → autonomous execution → loop until complete. Used in SealCode development. Will deprecate once upstream PRs land.
-
----
-
-## AI Launcher
-
-**Fast launcher for switching between AI coding assistants.**
-
-- **Repository:** [jellydn/ai-launcher](https://github.com/jellydn/ai-launcher)
-
-Fuzzy search interface for Claude Code, OpenCode, Amp, etc. Quick switching without managing multiple terminals.
-
----
 
 ## Tiny Coding Agent
 
@@ -92,11 +68,7 @@ Lightweight agent with minimal dependencies. Response to heavy frameworks that w
 
 ## Key Takeaways
 
-| Tool Combination | Best For |
-| ---------------- | -------------------------------------------------------- |
 | **Claude + spec-kit** | Greenfield projects requiring structured planning |
-| **Amp + Ralph** | Autonomous development with PRD-to-implementation pipelines |
-| **AI CLI Switcher** | Developers working with multiple AI tools |
 | **Tiny Agent** | Cost-conscious development with minimal overhead |
 
 Focused, single-purpose solutions > heavy, all-in-one frameworks.
@@ -184,7 +156,7 @@ Instead of adopting heavy frameworks, I prefer:
 | ---------------------- | --------------------------------------------------- |
 | **Minimal tooling** | Less context usage, more tokens for actual work |
 | **AGENTS.md** | Simple, portable project guidance |
-| **Native AI features** | Use built-in Claude/Amp capabilities first |
+| **Native AI features** | Use built-in Claude/OpenCode capabilities first |
 | **Add incrementally** | Only add tools when there's clear friction |
 
 The best tool is the one you don't have to think about.

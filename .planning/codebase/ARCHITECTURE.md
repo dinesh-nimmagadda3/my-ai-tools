@@ -1,8 +1,4 @@
-# Architecture
-
-## Overview
-
-my-ai-tools is a configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS, and others). It provides bidirectional synchronization between the repository configurations and the user's home directory.
+my-ai-tools is a configuration management repository for AI coding tools (Claude Code, Gemini, OpenCode, and Codex). It provides bidirectional synchronization between the repository configurations and the user's home directory.
 
 ## Design Pattern
 
@@ -48,13 +44,8 @@ Located in `configs/` - tool-specific configurations:
 |------|-----------------|------------------|
 | Claude Code | `configs/claude/` | `~/.claude/` |
 | OpenCode | `configs/opencode/` | `~/.config/opencode/` |
-| Amp | `configs/amp/` | `~/.config/amp/` |
-| CCS | `configs/ccs/` | `~/.ccs/` |
 | Codex | `configs/codex/` | `~/.codex/` |
 | Gemini CLI | `configs/gemini/` | `~/.gemini/` |
-| Cursor | `configs/cursor/` | `~/.cursor/` |
-| Factory | `configs/factory/` | `~/.factory/` |
-| Copilot | `configs/copilot/` | `~/.copilot/` |
 
 ### 4. Skills/Marketplace Layer
 

@@ -32,8 +32,6 @@
       "Bash(gh pr comment:*)",
       "Bash(gh api:*)",
       "Bash(claude:*)",
-      "Bash(ccs:*)",
-      "Bash(ccs version:*)",
       "Bash(kubectl get:*)",
       "Bash(kubectl logs:*)",
       "Bash(kubectl rollout status:*)",
@@ -115,16 +113,6 @@
           {
             "type": "command",
             "command": "bun ~/.claude/hooks/index.ts PreToolUse"
-          }
-        ]
-      },
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"~/.ccs/hooks/websearch-transformer.cjs\"",
-            "timeout": 120
           }
         ]
       }

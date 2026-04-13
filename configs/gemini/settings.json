@@ -1,27 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
   "mcpServers": {
-    "context7": {
-      "url": "https://mcp.context7.com/mcp"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": [
-        "mcp"
-      ]
-    },
-    "fff": {
-      "command": "fff-mcp",
-      "args": []
+    "hub": {
+      "url": "http://localhost:3000/sse"
     }
   },
+
   "security": {
     "auth": {
       "selectedType": "oauth-personal"
@@ -54,11 +38,12 @@
     "showModelInfoInChat": true
   },
   "general": {
-    "previewFeatures": true,
     "sessionRetention": {
       "enabled": true,
-      "maxAge": "30d",
-      "warningAcknowledged": true
+      "maxAge": "30d"
+    },
+    "plan": {
+      "enabled": true
     }
   },
   "context": {
@@ -76,10 +61,6 @@
   },
   "ide": {
     "enabled": true
-  },
-  "experimental": {
-    "enableAgents": true,
-    "plan": true
   },
   "hooks": {
     "BeforeAgent": [

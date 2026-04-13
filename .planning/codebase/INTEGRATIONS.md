@@ -8,10 +8,7 @@
 |----------|-------------------|-----------------|
 | **Anthropic (Claude)** | Direct subscription | Claude Code |
 | **OpenAI** | API key, OAuth | OpenCode, Codex |
-| **Google AI (Gemini)** | OAuth / API key | Gemini CLI, CCS |
-| **GLM (Zhipu)** | API profile | CCS |
-| **Ollama** | Local API | CCS, Codex |
-| **OpenRouter** | API profile | CCS |
+| **Google AI (Gemini)** | OAuth / API key | Gemini CLI |
 
 ### OAuth Providers (via CCS)
 
@@ -19,11 +16,8 @@
 |----------|-----|-------------|
 | **Gemini** | `gemini` | Google Gemini (OAuth) |
 | **Codex** | `codex` | OpenAI Codex (OAuth) |
-| **Agy** | `agy` | AI provider |
-| **Qwen** | `qwen` | Alibaba Qwen |
-| **iFlow** | `iflow` | Flow provider |
-| **Kiro** | `kiro` | AI provider |
-| **GitHub Copilot** | `ghcp` | Copilot API (unofficial) |
+| **Gemini** | `gemini` | Google Gemini (OAuth) |
+| **Codex** | `codex` | OpenAI Codex (OAuth) |
 
 ## MCP Server Integrations
 
@@ -66,11 +60,8 @@
 |------|-------------|---------|
 | **Claude Code** | `npm install -g @anthropic-ai/claude-code` | AI coding assistant |
 | **OpenCode** | `curl -fsSL https://opencode.ai/install \| bash` | AI coding assistant |
-| **Amp** | `curl -fsSL https://ampcode.com/install.sh \| bash` | AI coding assistant |
 | **Gemini CLI** | `npm install -g @google/gemini-cli` | Google AI CLI |
 | **Codex CLI** | `npm install -g @openai/codex` | OpenAI Codex CLI |
-| **CCS** | `npm install -g @kaitranntt/ccs` | Claude Code Switch |
-| **Factory Droid** | `npm install -g @factory/cli` | AI agent |
 | **backlog.md** | `npm install -g backlog.md` | Task management |
 
 ## Local Integrations
@@ -88,10 +79,8 @@
 |---------|------------------|-----------------|
 | **Claude Code** | `~/.claude/` | `$HOME/ai-tools-backup-{timestamp}/` |
 | **OpenCode** | `~/.config/opencode/` | - |
-| **Amp** | `~/.config/amp/` | - |
-| **CCS** | `~/.ccs/` | - |
-| **Factory Droid** | `~/.factory/` | - |
-| **Cursor** | `~/.cursor/rules/` | - |
+| **Gemini CLI** | `~/.gemini/` | - |
+| **Codex CLI** | `~/.codex/` | - |
 
 ## Authentication Methods
 
@@ -99,8 +88,7 @@
 |----------|--------|---------------|
 | **Anthropic** | Subscription | Claude Code app |
 | **Google** | OAuth | Gemini CLI browser flow |
-| **GitHub** | OAuth | Copilot API auth |
-| **API Keys** | Env vars | GLM, Ollama, OpenRouter |
+| **API Keys** | Env vars | OpenAI |
 
 ## Webhooks & Events
 
@@ -135,6 +123,4 @@ Transforms WebSearch queries:
 ## Reference Configuration
 
 - MCP servers: `configs/claude/mcp-servers.json`
-- CCS config: `configs/ccs/config.yaml`
-- Factory MCP: `configs/factory/mcp.json`
 - Gemini settings: `configs/gemini/settings.json`

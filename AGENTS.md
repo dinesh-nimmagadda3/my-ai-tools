@@ -4,7 +4,7 @@
 - Use the fff MCP tools for all file search operations instead of default tools.
 
 ## Project
-my-ai-tools: Configuration management repository for AI coding tools (Claude Code, OpenCode, Amp, CCS) and their integration with MCP servers and plugins.
+my-ai-tools: Configuration management repository for AI coding tools (Claude Code, Gemini, OpenCode, and Codex) and their integration with MCP servers and plugins.
 
 ## Build/Lint/Test Commands
 
@@ -79,13 +79,9 @@ log_error()  { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 ### JSON Configuration
 - Standard JSON formatting (no trailing commas)
 - Use `jq` for parsing/validation: `jq . settings.json`
-- Claude Code: `settings.json`, `mcp-servers.json`
-- OpenCode/Amp: `settings.json`
-- CCS: `config.json`, `delegation-sessions.json`
+- OpenCode: `settings.json`
 
 ### YAML Configuration
-- 2-space indentation (no tabs)
-- CCS: `config.yaml` for main configuration
 - Hooks: YAML-based hook definitions
 
 ### Markdown Documentation
@@ -110,9 +106,8 @@ cli.sh, generate.sh          # Root shell scripts
 configs/<tool>/              # Source configurations
   claude/                    # Claude Code settings, MCP, commands, agents, skills
   opencode/                  # OpenCode agents, commands, skills
-  amp/                       # Amp settings, skills
-  ccs/                       # CCS configuration, hooks, cliproxy
-  ai-launcher/               # AI Launcher config
+  gemini/                    # Gemini CLI config
+  codex/                     # Codex CLI config
 skills/      # Local skills for distribution
 ```
 

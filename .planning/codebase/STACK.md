@@ -28,14 +28,8 @@
 |------|-----------------|-------------|
 | **Claude Code** | `configs/claude/` | Primary AI coding assistant |
 | **OpenCode** | `configs/opencode/` | OpenAI-powered assistant |
-| **Amp** | `configs/amp/` | Modular AI coding tool |
-| **CCS** | `configs/ccs/` | Claude Code Switch - multi-provider |
 | **Gemini CLI** | `configs/gemini/` | Google Gemini CLI |
 | **Codex CLI** | `configs/codex/` | OpenAI Codex CLI |
-| **Copilot CLI** | `configs/copilot/` | GitHub Copilot CLI |
-| **Cursor Agent** | `configs/cursor/` | Cursor Agent CLI |
-| **Factory Droid** | `configs/factory/` | Factory AI agent |
-| **AI Launcher** | `configs/ai-launcher/` | Tool switcher |
 
 ## MCP Servers (Model Context Protocol)
 
@@ -89,12 +83,8 @@ my-ai-tools/                  # Root configuration repository
 ├── configs/                  # Source configurations
 │   ├── claude/              # Claude Code config
 │   ├── opencode/            # OpenCode config
-│   ├── amp/                 # Amp config
-│   ├── ccs/                 # CCS config
 │   ├── gemini/              # Gemini CLI config
-│   ├── codex/               # Codex CLI config
-│   ├── factory/             # Factory Droid config
-│   └── ...
+│   └── codex/               # Codex CLI config
 ├── skills/                   # Claude skills for distribution
 │   ├── codemap/
 │   ├── qmd-knowledge/
@@ -110,4 +100,4 @@ my-ai-tools/                  # Root configuration repository
 - **Bun or Node.js LTS** - Runtime for tools and scripts
 - **Git** - Version control
 - **jq** - JSON parsing
-- **Claude Code subscription** - Or use CCS with affordable providers
+- **Claude Code subscription**

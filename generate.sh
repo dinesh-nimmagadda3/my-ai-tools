@@ -310,7 +310,6 @@ main() {
 	echo
 
 	echo
-
 	generate_codex_configs
 	echo
 
@@ -321,8 +320,6 @@ main() {
 	echo
 
 	generate_memory_md
-	echo
-
 	echo
 
 	log_success "Config generation complete!"
