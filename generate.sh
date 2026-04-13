@@ -46,6 +46,30 @@ copy_directory() {
 	fi
 }
 
+generate_kilo_configs() {
+	log_info "Generating Kilo CLI configs..."
+	if [ ! -d "$HOME/.config/kilo" ]; then
+		log_warning "Kilo CLI config directory not found: $HOME/.config/kilo"
+		return 0
+	fi
+	execute "mkdir -p $SCRIPT_DIR/configs/kilo"
+	copy_single "$HOME/.config/kilo/config.json" "$SCRIPT_DIR/configs/kilo/config.json"
+	copy_single "$HOME/.config/kilo/AGENTS.md" "$SCRIPT_DIR/configs/kilo/AGENTS.md"
+	log_success "Kilo CLI configs generated"
+}
+
+generate_pi_configs() {
+	log_info "Generating Pi configs..."
+	if [ ! -d "$HOME/.pi" ]; then
+		log_warning "Pi config directory not found: $HOME/.pi"
+		return 0
+	fi
+	execute "mkdir -p $SCRIPT_DIR/configs/pi"
+	copy_single "$HOME/.pi/SYSTEM.md" "$SCRIPT_DIR/configs/pi/SYSTEM.md"
+	copy_single "$HOME/.pi/AGENTS.md" "$SCRIPT_DIR/configs/pi/AGENTS.md"
+	log_success "Pi configs generated"
+}
+
 # Copy a Claude subdirectory with proper logging
 # Usage: copy_claude_subdirectory "source_path" "dest_path" "name_for_logging"
 copy_claude_subdirectory() {
@@ -147,7 +171,16 @@ generate_opencode_configs() {
 	fi
 
 	execute "mkdir -p $SCRIPT_DIR/configs/opencode"
-	copy_single "$HOME/.config/opencode/opencode.json" "$SCRIPT_DIR/configs/opencode/opencode.json"
+
+	# Copy and clean opencode.json (strip local-only providers like ollama)
+	if [ -f "$HOME/.config/opencode/opencode.json" ]; then
+		if command -v jq &>/dev/null; then
+			execute "jq 'del(.provider)' \"$HOME/.config/opencode/opencode.json\" > \"$SCRIPT_DIR/configs/opencode/opencode.json\""
+			log_success "Generated and cleaned opencode.json (removed local providers)"
+		else
+			copy_single "$HOME/.config/opencode/opencode.json" "$SCRIPT_DIR/configs/opencode/opencode.json"
+		fi
+	fi
 
 	# Copy skills with filtering
 	copy_skills_with_filter "$HOME/.config/opencode/skills" "$SCRIPT_DIR/configs/opencode/skills" "OpenCode"
@@ -290,14 +323,10 @@ main() {
 	generate_gemini_configs
 	echo
 
+	generate_kilo_configs
 	echo
 
-	echo
-
-	echo
-
-	echo
-
+	generate_pi_configs
 	echo
 
 	generate_best_practices

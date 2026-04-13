@@ -779,6 +779,30 @@ install_gemini() {
 	run_installer "Google Gemini CLI" "_run_gemini_install" "command -v gemini" ""
 }
 
+install_kilocode() {
+	_run_kilocode_install() {
+		if command -v kilo &>/dev/null; then
+			log_warning "Kilo CLI is already installed"
+		else
+			execute "pnpm install -g @kilocode/cli"
+			log_success "Kilo CLI installed"
+		fi
+	}
+	run_installer "Kilo CLI" "_run_kilocode_install" "command -v kilo" ""
+}
+
+install_pi() {
+	_run_pi_install() {
+		if command -v pi &>/dev/null; then
+			log_warning "Pi AI Agent is already installed"
+		else
+			execute "pnpm install -g @mariozechner/pi-coding-agent"
+			log_success "Pi AI Agent installed"
+		fi
+	}
+	run_installer "Pi AI Agent" "_run_pi_install" "command -v pi" ""
+}
+
 
 
 
@@ -1136,22 +1160,19 @@ copy_pi_configs() {
 	fi
 
 	log_info "Detected Pi (via $pi_status)"
-	execute_quoted mkdir -p "$HOME/.pi/agent"
+	execute_quoted mkdir -p "$HOME/.pi"
 
-	if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
-		copy_config_file "$SCRIPT_DIR/configs/pi/settings.json" "$HOME/.pi/agent/" || true
-	else
-		log_info "Pi settings.json already exists at ~/.pi/agent/, preserving existing config"
+	# Pi Coding Agent uses SYSTEM.md for instructions
+	if [ -f "$SCRIPT_DIR/configs/pi/SYSTEM.md" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/pi/SYSTEM.md" "$HOME/.pi/" || true
 	fi
 
-	if [ -d "$SCRIPT_DIR/configs/pi/themes" ]; then
-		execute_quoted mkdir -p "$HOME/.pi/agent/themes"
-		safe_copy_dir "$SCRIPT_DIR/configs/pi/themes" "$HOME/.pi/agent/themes"
+	# Legacy support for AGENTS.md if present
+	if [ -f "$SCRIPT_DIR/configs/pi/AGENTS.md" ]; then
+		copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/" || true
 	fi
 
-	copy_config_file "$SCRIPT_DIR/configs/pi/AGENTS.md" "$HOME/.pi/agent/" || true
-
-	log_success "Pi configs copied"
+	log_success "Pi configs aligned with system standards"
 }
 
 copy_copilot_configs() {
@@ -1651,6 +1672,12 @@ main() {
 	echo
 
 	install_gemini
+	echo
+
+	install_kilocode
+	echo
+
+	install_pi
 	echo
 
 	echo

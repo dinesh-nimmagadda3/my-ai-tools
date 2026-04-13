@@ -1,10 +1,6 @@
 # Welcome to my-ai-tools 👋
 
-[![GitHub stars](https://img.shields.io/github/stars/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/stargazers)
-[![GitHub license](https://img.shields.io/github/license/jellydn/my-ai-tools)](https://github.com/jellydn/my-ai-tools/blob/main/LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jellydn/my-ai-tools/pulls)
-
-> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Codex, and Gemini CLI with custom configurations, MCP servers, skills, plugins, and commands.
+> **Comprehensive configuration management for AI coding tools** - Replicate my complete setup for Claude Code, OpenCode, Codex, Gemini CLI, Kilo, and Pi with custom configurations, MCP servers, skills, and commands.
 
 📖 **[View Documentation Website](https://ai-tools.itman.fyi)** - Interactive landing page with full documentation and search.
 
@@ -12,7 +8,7 @@
 
 - 🚀 **One-line installer** - Get started in seconds
 - 🔄 **Bidirectional sync** - Install configs or export your current setup
-- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Codex, and Gemini CLI
+- 🤖 **Multiple AI tools** - Claude Code, OpenCode, Codex, Gemini CLI, Kilo, and Pi
 - 🔌 **MCP Server integration** - Context7, Sequential-thinking, qmd
 - 🎯 **Custom agents & skills** - Pre-configured for maximum productivity
 - 🤝 **Agent Teams** - Coordinate specialized agents for complex workflows (code review, testing, docs)
@@ -77,7 +73,7 @@ curl -fsSL https://ai-tools.itman.fyi/install.sh | bash -s -- --no-backup
 Clone the repository and run the installer:
 
 ```bash
-git clone https://github.com/jellydn/my-ai-tools.git
+git clone <your-private-repo-url>
 cd my-ai-tools
 ./cli.sh
 ```
@@ -298,10 +294,10 @@ The setup script (`./cli.sh`) installs community skills from this repository to 
 
 ```bash
 # Install all skills at once using npx skills add
-npx skills add jellydn/my-ai-tools --yes --global --agent claude-code
+npx skills add local --yes --global --agent claude-code
 
 # Or install interactively (select which skills to install)
-npx skills add jellydn/my-ai-tools --global --agent claude-code
+npx skills add local --global --agent claude-code
 ```
 
 #### Available Skills
@@ -627,7 +623,7 @@ Copy [`configs/opencode/opencode.json`](configs/opencode/opencode.json) to `~/.c
           "qmd query": "allow",
           "qmd get": "allow",
           "qmd search": "allow",
-          "$HOME/.config/opencode/skill/qmd-knowledge/scripts/record.sh": "allow",
+          "$HOME/.config/opencode/skills/qmd-knowledge/scripts/record.sh": "allow",
           "$HOME/.claude/skills/qmd-knowledge/scripts/record.sh": "allow"
         }
       }
