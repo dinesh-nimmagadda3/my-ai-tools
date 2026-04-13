@@ -122,17 +122,20 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/HEAD/src/
 ```
 
 **MCP Tools exposed:**
-- `query` — Semantic search over knowledge base
-- `get` — Retrieve a specific knowledge entry
-- `search` — Full-text search
-- `vsearch` — Vector similarity search
-- `multi_get` — Retrieve multiple entries
-- `status` — Knowledge base status
+- `query` — Hybrid search (BM25 + Vector + Reranking)
+- `get` — Retrieve a specific document by path or docid
+- `multi_get` — Batch retrieve documents (glob/list)
+- `status` — Index health and collection info
+
+**Optional Performance Tuning:**
+- Use `qmd mcp --http` to start a long-lived server (prevents model reloading).
+- Set `QMD_EMBED_MODEL` to override the default GGUF embedding model.
 
 **Prerequisite:** `qmd` binary must be installed (`bun install -g @tobilu/qmd`)
 
 **How to verify alignment:**
 ```bash
+# Check if the mcp command and tools match official docs
 qmd --version
 qmd mcp --help
 ```
@@ -159,6 +162,11 @@ qmd mcp --help
 }
 ```
 
+**MCP Tools exposed:**
+- `search` — Fast file name search (git-aware)
+- `grep` — High-speed content search
+- `open` / `get` — Optimized file reading
+
 **Prerequisite:** `fff-mcp` binary must be installed via the official installer:
 ```bash
 curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
@@ -166,7 +174,8 @@ curl -fsSL https://dmtrkovalenko.dev/install-fff-mcp.sh | bash
 
 **How to verify alignment:**
 ```bash
-fff-mcp --version
+# Verify the binary exists and show help
+fff-mcp --help
 ```
 
 ---
@@ -227,7 +236,7 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
   "args": [
     "-y",
     "@modelcontextprotocol/server-filesystem",
-    "/home/dinesh"
+    "/home/dinesh/projects"
   ],
   "shared": true,
   "enabled": true
@@ -245,6 +254,48 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 ```bash
 # Verify the README for command/args and allowed paths protocol
 curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/filesystem/README.md | grep "@modelcontextprotocol/server-filesystem"
+```
+
+---
+
+### 7. chrome-devtools
+
+| Property | Value |
+|---|---|
+| **Upstream** | https://github.com/ChromeDevTools/chrome-devtools-mcp |
+| **Package** | `chrome-devtools-mcp` |
+| **Type** | `stdio` (local, spawned via npx) |
+| **Purpose** | Browser automation and inspection — navigate, interact, and debug web pages |
+
+**Registry entry:**
+```json
+"chrome-devtools": {
+  "type": "stdio",
+  "command": "npx",
+  "args": [
+    "-y",
+    "chrome-devtools-mcp@latest",
+    "--headless"
+  ],
+  "shared": true,
+  "enabled": true
+}
+```
+
+**MCP Tools exposed:**
+- Navigation: `navigate`, `click`, `type`, `scroll`
+- Inspection: `get_console_logs`, `get_network_logs`, `screenshot`
+- Execution: `evaluate_script`
+- **Slim mode**: Use `--slim` in `args` to only expose navigation and screenshots.
+
+**Capabilities & Limitations:**
+- **Headless Mode**: ✅ Supported via `--headless` flag (enabled in our default config).
+- **Firefox Support**: ❌ Not officially supported. The server is purpose-built for Chromium-based browsers via the Chrome DevTools Protocol (CDP).
+
+**How to verify alignment:**
+```bash
+# Check if the mcp command and flags match official docs
+curl -s https://raw.githubusercontent.com/ChromeDevTools/chrome-devtools-mcp/main/README.md | grep "headless"
 ```
 
 ---
@@ -308,6 +359,7 @@ Use this checklist periodically to keep configurations aligned with upstream:
 | `fff` | https://github.com/dmtrKovalenko/fff.nvim | Install script URL |
 | `memory` | https://github.com/modelcontextprotocol/servers/tree/main/src/memory | `npm show @modelcontextprotocol/server-memory` |
 | `filesystem` | https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem | `npm show @modelcontextprotocol/server-filesystem` |
+| `chrome-devtools` | https://github.com/ChromeDevTools/chrome-devtools-mcp | `npm show chrome-devtools-mcp` |
 
 **Things to check on each server update:**
 - [ ] URL or package name changed?

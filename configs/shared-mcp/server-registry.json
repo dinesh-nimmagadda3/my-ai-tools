@@ -47,6 +47,17 @@
       ],
       "shared": true,
       "enabled": true
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--headless"
+      ],
+      "shared": true,
+      "enabled": true
     }
   }
 }
