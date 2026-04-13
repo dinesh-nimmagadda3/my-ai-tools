@@ -32,7 +32,6 @@ interface McpBackend {
 
 class McpHubV5 {
   private backends: Record<string, McpBackend> = {};
-  private mcpServer: McpServer;
   private app: any; 
   private transports: Map<string, StreamableHTTPServerTransport> = new Map();
 
