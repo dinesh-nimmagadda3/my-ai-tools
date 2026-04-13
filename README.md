@@ -146,6 +146,8 @@ Edit `configs/shared-mcp/server-registry.json` and add:
 
 All connected tools will automatically inherit the new server. No client reconfiguration needed.
 
+> 📖 **Full MCP reference, per-server configs, and maintenance checklist:** [MCP.md](MCP.md)
+
 ---
 
 ## 🧩 Skills

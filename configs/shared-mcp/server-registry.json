@@ -22,7 +22,7 @@
       "enabled": true
     },
     "context7": {
-      "type": "sse",
+      "type": "http",
       "url": "https://mcp.context7.com/mcp",
       "shared": true,
       "enabled": true
