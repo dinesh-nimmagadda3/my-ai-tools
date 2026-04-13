@@ -10,8 +10,8 @@ RemainAfterExit=yes
 WorkingDirectory=$REPLACE_WITH_PROJECT_DIR/configs/shared-mcp
 Environment=PROJECT_DIR=$REPLACE_WITH_PROJECT_DIR
 # The compose file uses host volumes, so we must expose these variables
-ExecStart=/usr/bin/podman-compose up -d
-ExecStop=/usr/bin/podman-compose down
+ExecStart=/usr/bin/podman compose up -d
+ExecStop=/usr/bin/podman compose down
 Restart=on-failure
 RestartSec=10
 

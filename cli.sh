@@ -1036,12 +1036,12 @@ mcp-hub() {
 			;;
 		compose-up)
 			log_info "Launching Hub via Podman Compose..."
-			(cd "$SCRIPT_DIR/configs/shared-mcp" && export PROJECT_DIR="$SCRIPT_DIR" && podman-compose up -d)
+			(cd "$SCRIPT_DIR/configs/shared-mcp" && export PROJECT_DIR="$SCRIPT_DIR" && podman compose up -d)
 			log_success "Podman Compose deployment active"
 			;;
 		compose-down)
 			log_info "Stopping Podman Compose deployment..."
-			(cd "$SCRIPT_DIR/configs/shared-mcp" && podman-compose down)
+			(cd "$SCRIPT_DIR/configs/shared-mcp" && podman compose down)
 			log_success "Podman Compose deployment stopped"
 			;;
 		podman-setup | podman-start | podman-stop)
