@@ -111,7 +111,7 @@ generate_claude_configs() {
 	copy_claude_subdirectory "$HOME/.claude/hooks" "$SCRIPT_DIR/configs/claude/hooks" "hooks"
 	copy_skills "$HOME/.claude/skills" "$SCRIPT_DIR/configs/claude/skills" "Claude Code"
 
-	# Copy settings.json (with Windows path fix)
+	# Copy claude.json (with Windows path fix)
 	copy_claude_settings
 
 	log_success "Claude Code configs generated"
@@ -122,21 +122,21 @@ copy_claude_settings() {
 
 	if [ "$IS_WINDOWS" = true ]; then
 		# Windows: Claude Code uses ~/.claude directly
-		settings_source="$HOME/.claude/settings.json"
+		settings_source="$HOME/.claude/claude.json"
 	else
 		# Mac/Linux: Check canonical location first
-		if [ -f "$HOME/.claude/settings.json" ]; then
-			settings_source="$HOME/.claude/settings.json"
-		elif [ -f "$HOME/.config/claude/settings.json" ]; then
-			settings_source="$HOME/.config/claude/settings.json"
+		if [ -f "$HOME/.claude/claude.json" ]; then
+			settings_source="$HOME/.claude/claude.json"
+		elif [ -f "$HOME/.config/claude/claude.json" ]; then
+			settings_source="$HOME/.config/claude/claude.json"
 			log_warning "Using XDG config path (older configuration detected)"
 		else
-			log_warning "settings.json not found in ~/.claude/ or ~/.config/claude/"
+			log_warning "claude.json not found in ~/.claude/ or ~/.config/claude/"
 		fi
 	fi
 
 	if [ -n "$settings_source" ]; then
-		copy_single "$settings_source" "$SCRIPT_DIR/configs/claude/settings.json"
+		copy_single "$settings_source" "$SCRIPT_DIR/configs/claude/claude.json"
 	fi
 }
 

@@ -7,8 +7,9 @@
         "~/projects/my-ai-tools/configs/shared-mcp/bridge.ts"
       ],
       "env": {
-        "HUB_URL": "http://localhost:5115/sse"
+        "HUB_URL": "http://localhost:5115/hub"
       }
+
 
     }
   }

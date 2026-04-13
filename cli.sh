@@ -979,8 +979,8 @@ validate_all_configs() {
 	local config_validation_failed=false
 
 	# Validate Claude Code configs
-	if ! validate_config_with_schema "$SCRIPT_DIR/configs/claude/settings.json"; then
-		log_error "Claude Code settings.json failed validation"
+	if ! validate_config_with_schema "$SCRIPT_DIR/configs/claude/claude.json"; then
+		log_error "Claude Code claude.json failed validation"
 		config_validation_failed=true
 	fi
 
@@ -1026,7 +1026,7 @@ copy_claude_configs() {
 	execute_quoted mkdir -p "$HOME/.claude"
 
 	# Copy core configs
-	execute_quoted cp "$SCRIPT_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
+	execute_quoted cp "$SCRIPT_DIR/configs/claude/claude.json" "$HOME/.claude/claude.json"
 	execute_quoted cp "$SCRIPT_DIR/configs/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 
 	# Copy directories
