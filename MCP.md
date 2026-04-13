@@ -90,9 +90,13 @@ curl -s https://raw.githubusercontent.com/upstash/context7/master/README.md | gr
 **MCP Tools exposed:**
 - `sequentialthinking` — Dynamic problem decomposition with revision capabilities
 
+**Optional Environment Variables:**
+- `DISABLE_THOUGHT_LOGGING`: Set to `true` to disable logging of thought information to the terminal.
+
 **How to verify alignment:**
 ```bash
-npm show @modelcontextprotocol/server-sequential-thinking version
+# Check if the package command matches official docs
+curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/HEAD/src/sequentialthinking/README.md | grep "@modelcontextprotocol/server-sequential-thinking"
 ```
 
 ---
