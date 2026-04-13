@@ -68,8 +68,8 @@ Select components to install (e.g., 1,2,5 or 'all'):
 3) OpenCode (TUI/CLI)
 4) OpenAI Codex CLI
 5) Shared MCP Hub (V5 Infrastructure)
-6) Common MCP Backends (fff-mcp, qmd, context7)
-7) Global Tooling (biome, ruff, jq, etc.)
+6) Common MCP Backends (fff, qmd, context7, memory, filesystem, devtools)
+7) Global Tooling (biome, ruff, jq, binlock, etc.)
 all) Install everything
 
 Selection: 1,2,5
@@ -120,10 +120,10 @@ Instead of each AI tool connecting to MCP servers individually, this kit uses a 
 
 ```
 Claude Code  ──┐
-Gemini CLI   ──┤──▶  Shared Hub (port 5115)  ──▶  context7
-OpenCode     ──┤         bridge.ts                  fff-mcp
-Codex CLI    ──┘       multiplexer.ts               qmd
-                                                    sequential-thinking
+Gemini CLI   ──┤──▶  Shared Hub (port 5115)  ──▶  fff, qmd, context7 (Core)
+OpenCode     ──┤         bridge.ts                  memory (Memory Graph)
+Codex CLI    ──┘       multiplexer.ts               filesystem, devtools (Sys)
+                                                    sequential-thinking (Logic)
 ```
 
 **How it works:**
