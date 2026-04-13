@@ -36,7 +36,17 @@
       },
       "shared": true,
       "enabled": true
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/dinesh/projects"
+      ],
+      "shared": true,
+      "enabled": true
     }
   }
 }
-

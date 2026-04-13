@@ -210,6 +210,45 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 
 ---
 
+### 6. filesystem
+
+| Property | Value |
+|---|---|
+| **Upstream** | [MCP Servers (Filesystem)](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) |
+| **Package** | `@modelcontextprotocol/server-filesystem` |
+| **Type** | `stdio` (local, spawned via npx) |
+| **Purpose** | Secure local filesystem access — read, write, create, and search files/directories |
+
+**Registry entry:**
+```json
+"filesystem": {
+  "type": "stdio",
+  "command": "npx",
+  "args": [
+    "-y",
+    "@modelcontextprotocol/server-filesystem",
+    "/home/dinesh"
+  ],
+  "shared": true,
+  "enabled": true
+}
+```
+
+**MCP Tools exposed:**
+- `read_text_file` / `read_multiple_files` — Read file contents
+- `write_file` / `edit_file` — Create or modify files
+- `create_directory` / `list_directory` — Manage directories
+- `search_files` / `directory_tree` — Explore the filesystem
+- `move_file` / `get_file_info` — File management and metadata
+
+**How to verify alignment:**
+```bash
+# Verify the README for command/args and allowed paths protocol
+curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/filesystem/README.md | grep "@modelcontextprotocol/server-filesystem"
+```
+
+---
+
 ## ➕ Adding a New MCP Server
 
 ### Step 1 — Add to the registry
@@ -268,6 +307,7 @@ Use this checklist periodically to keep configurations aligned with upstream:
 | `qmd` | https://github.com/tobi/qmd | `npm show @tobilu/qmd` |
 | `fff` | https://github.com/dmtrKovalenko/fff.nvim | Install script URL |
 | `memory` | https://github.com/modelcontextprotocol/servers/tree/main/src/memory | `npm show @modelcontextprotocol/server-memory` |
+| `filesystem` | https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem | `npm show @modelcontextprotocol/server-filesystem` |
 
 **Things to check on each server update:**
 - [ ] URL or package name changed?
