@@ -292,8 +292,8 @@ Your final deliverable should include:
 - Coverage: 95% on new code
 
 ### Verification
-1. Run `npm test` - all tests pass
-2. Start server: `npm run dev`
+1. Run `bun test` (or `npm test` if no bun setup)
+2. Start server: `bun run dev`
 3. Test endpoints: `curl localhost:3000/api/profile`
 ```
 
