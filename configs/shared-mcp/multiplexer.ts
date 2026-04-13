@@ -1,4 +1,4 @@
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -30,16 +30,16 @@ interface McpBackend {
   status: "connected" | "error";
 }
 
-class McpHubV4 {
+class McpHubV5 {
   private backends: Record<string, McpBackend> = {};
-  private server: Server;
+  private mcpServer: McpServer;
   private app: any; 
   private transports: Map<string, StreamableHTTPServerTransport> = new Map();
 
   constructor() {
-    this.server = new Server({
+    this.mcpServer = new McpServer({
       name: "shared-mcp-hub",
-      version: "4.0.0",
+      version: "5.0.0",
     }, {
       capabilities: { tools: {}, resources: {}, prompts: {} }
     });
@@ -49,7 +49,7 @@ class McpHubV4 {
   }
 
   private setupRoutes() {
-    // Unified V4 Hub Endpoint: POST (messages), GET (stream), DELETE (terminate)
+    // Unified Hub Endpoint: POST (messages), GET (stream), DELETE (terminate)
     const hubHandler = async (req: Request, res: Response) => {
       const sessionId = req.headers["mcp-session-id"] as string;
 
@@ -76,7 +76,7 @@ class McpHubV4 {
             }
           };
 
-          await this.server.connect(transport);
+          await this.mcpServer.connect(transport);
           await transport.handleRequest(req, res, req.body);
           return;
         }
@@ -98,7 +98,7 @@ class McpHubV4 {
 
     this.app.all("/hub", hubHandler);
 
-    // V3: Dynamic Registration (kept for flexibility)
+    // Dynamic Registration (kept for flexibility)
     this.app.post("/register", async (req: Request, res: Response) => {
       const { name, config } = req.body;
       logger.info(`[Hub] Dynamic registration request for: ${name}`);
@@ -110,7 +110,7 @@ class McpHubV4 {
       }
     });
 
-    // V4: Health & Status Dashboard
+    // Health & Status Dashboard
     this.app.get("/status", (_req: Request, res: Response) => {
       const status = Object.entries(this.backends).map(([name, data]) => ({
         name,
@@ -120,8 +120,8 @@ class McpHubV4 {
       }));
       res.json({
         hub: "ACTIVE",
-        version: "4.0.0",
-        protocol: "Streamable HTTP",
+        version: "5.0.0",
+        protocol: "Streamable HTTP (McpServer)",
         activeSessions: this.transports.size,
         backends: status,
         uptime: process.uptime()
@@ -139,18 +139,12 @@ class McpHubV4 {
         env: { ...process.env, ...config.env }
       });
     } else if (config.type === "sse" || config.type === "http") {
-      // Use modern transport if it's likely a new server, fallback to SSE patterns if it ends in /sse
-      if (config.url.endsWith("/sse")) {
-         // This is technically deprecated but kept until backends migrate
-         const { SSEClientTransport } = await import("@modelcontextprotocol/sdk/client/sse.js");
-         transport = new SSEClientTransport(new URL(config.url));
-      } else {
-         transport = new StreamableHTTPClientTransport(new URL(config.url));
-      }
+      transport = new StreamableHTTPClientTransport(new URL(config.url));
     }
 
+
     if (transport) {
-      const client = new Client({ name: "hub-proxy", version: "4.0.0" }, { capabilities: {} });
+      const client = new Client({ name: "hub-proxy", version: "5.0.0" }, { capabilities: {} });
       await client.connect(transport);
       this.backends[name] = { client, config, status: "connected" };
       logger.info(`[Hub] Successfully aggregated backend: ${name}`);
@@ -168,8 +162,8 @@ class McpHubV4 {
       }
     }
 
-    // 2. Setup standard request handlers
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+    // 2. Setup standard request handlers using the underlying server
+    this.mcpServer.server.setRequestHandler(ListToolsRequestSchema, async () => {
       const allTools = [];
       for (const [name, data] of Object.entries(this.backends)) {
         try {
@@ -180,7 +174,7 @@ class McpHubV4 {
       return { tools: allTools };
     });
 
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    this.mcpServer.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
       for (const data of Object.values(this.backends)) {
         try {
@@ -195,14 +189,14 @@ class McpHubV4 {
 
     // 3. Start listening
     this.app.listen(PORT, () => {
-      logger.info(`[Hub] Shared MCP Multiplexer V4 listening on port ${PORT}`);
+      logger.info(`[Hub] Shared MCP Multiplexer V5 listening on port ${PORT}`);
       logger.info(`[Hub] Endpoint: http://localhost:${PORT}/hub`);
       logger.info(`[Hub] Health Dashboard: http://localhost:${PORT}/status`);
     });
   }
 }
 
-const hub = new McpHubV4();
+const hub = new McpHubV5();
 hub.start().catch((err: Error) => logger.error(err));
 
 // Graceful exit

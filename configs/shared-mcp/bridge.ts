@@ -1,7 +1,7 @@
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
@@ -13,16 +13,16 @@ async function runBridge() {
   const clientTransport = new StreamableHTTPClientTransport(new URL(HUB_URL));
   const hubClient = new Client({
     name: "mcp-bridge-client",
-    version: "4.0.0",
+    version: "5.0.0",
   }, {
     capabilities: {}
   });
 
   await hubClient.connect(clientTransport);
 
-  const bridgeServer = new Server({
+  const bridgeServer = new McpServer({
     name: "mcp-bridge-server",
-    version: "4.0.0",
+    version: "5.0.0",
   }, {
     capabilities: {
       tools: {},
@@ -30,11 +30,11 @@ async function runBridge() {
     }
   });
 
-  bridgeServer.setRequestHandler(ListToolsRequestSchema, async () => {
+  bridgeServer.server.setRequestHandler(ListToolsRequestSchema, async () => {
     return await hubClient.listTools();
   });
 
-  bridgeServer.setRequestHandler(CallToolRequestSchema, async (request) => {
+  bridgeServer.server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return await hubClient.callTool(request.params);
   });
 
