@@ -1195,20 +1195,36 @@ install_mcp_interactive() {
 	local install_cmd="$2"
 	local description="$3"
 
-	if [ "$YES_TO_ALL" = true ]; then
-		log_info "Auto-accepting MCP server installation (--yes flag)"
+	_mcp_exists() {
+		claude mcp list --scope user 2>/dev/null | grep -Fq "$name"
+	}
+
+	_install_mcp() {
+		if _mcp_exists; then
+			log_info "$name MCP server already exists - skipping"
+			return 0
+		fi
+
 		if execute "$install_cmd"; then
 			log_success "$name MCP server added (global)"
-		else
-			log_warning "$name already installed or failed"
+			return 0
 		fi
+
+		if _mcp_exists; then
+			log_info "$name MCP server already exists - skipping"
+			return 0
+		fi
+
+		log_warning "$name MCP server install failed"
+		return 1
+	}
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-accepting MCP server installation (--yes flag)"
+		_install_mcp
 	elif [ -t 0 ]; then
 		if prompt_yn "Install $name MCP server ($description)"; then
-			if execute "$install_cmd"; then
-				log_success "$name MCP server added (global)"
-			else
-				log_warning "$name already installed or failed"
-			fi
+			_install_mcp
 		fi
 	else
 		install_mcp_server "$name" "$install_cmd"
@@ -1315,11 +1331,14 @@ setup_claude_mcp_servers() {
 		local bridge_path="$HOME/.ai-tools/shared-mcp/bridge.ts"
 		
 		# Check if already exists before adding
-		if ! claude mcp list --scope user 2>/dev/null | grep -q "shared-hub"; then
-			execute "claude mcp add --scope user --transport stdio shared-hub -- bun run $bridge_path"
-			log_success "Claude now connected via Shared Hub Bridge"
-		else
+		if claude mcp list --scope user 2>/dev/null | grep -Fq "shared-hub"; then
 			log_info "Claude Shared Hub already exists - skipping registration"
+		elif execute "claude mcp add --scope user --transport stdio shared-hub -- bun run $bridge_path"; then
+			log_success "Claude now connected via Shared Hub Bridge"
+		elif claude mcp list --scope user 2>/dev/null | grep -Fq "shared-hub"; then
+			log_info "Claude Shared Hub already exists - skipping registration"
+		else
+			log_warning "Failed to register Claude Shared Hub Bridge"
 		fi
 	elif [ "$CONFIG_CLAUDE_MCP" = "2" ]; then
 		log_info "Setting up standalone MCP servers for Claude..."
