@@ -43,14 +43,17 @@ Before non-trivial edits, use `update_plan`.
 
 ## Skill Policy
 
-- Before improvising in a new domain, check for a relevant skill at https://skills.sh
+- Before improvising in a new domain, check for a relevant skill.
+- Prefer already-available local, built-in, or repository-provided skills first.
+- If no suitable local or already-available skill exists, external skill discovery and installation via `skills.sh` is allowed.
 - Process:
-  1. Check the skills.sh leaderboard for the domain
-  2. Run `npx skills find [specific keywords]`
-  3. Verify quality: prefer 1K+ installs, prefer sources `vercel-labs`, `anthropics`, `microsoft`
-  4. If found, install with `npx skills add <owner/repo@skill> -g -y` and follow its workflow
-  5. Fall back to default workflow only when no suitable skill exists
-- Do not install external skill systems unless repository or user explicitly requires it.
+  1. Check the `skills.sh` leaderboard for the domain.
+  2. Run `npx skills find [specific keywords]`.
+  3. Verify quality: prefer 1K+ installs and trusted sources such as `vercel-labs`, `anthropics`, or `microsoft`.
+  4. If a suitable skill is found, install it with `npx skills add <owner/repo@skill> -g -y` and follow its workflow.
+  5. Fall back to the default workflow only when no suitable skill exists.
+- If the repository or user forbids external installation, do not install external skills.
+- When multiple skills are relevant, prefer the most specific one.
 
 ## Tool-Selection Policy
 
@@ -138,16 +141,16 @@ Before adding dependencies:
 
 ## Validation Policy
 
-After edits, run the most relevant available checks using repository's configured toolchain.
+After each completed phase and before concluding the task, run the most relevant available checks using the repository's configured toolchain.
 
 Validation workflow:
 
-1. After EACH `apply_patch`: detect lint and typecheck commands from manifests/scripts, run them immediately, fix failures before next edit.
-2. Detect project validation commands from manifests, scripts, task runners, config files, and docs.
-3. Run narrowest relevant checks for changed area first.
-4. If repo defines lint, typecheck, test, build, or equivalent, use those.
-5. If check fails, read exact error, inspect local context, research externally only if needed, fix one class of failure at a time, rerun.
-6. Before concluding, run broader validation when feasible.
+1. Detect project validation commands from manifests, scripts, task runners, config files, and repository docs.
+2. After each logical change set or completed phase, run the narrowest relevant checks for the changed area.
+3. Use repository-defined validation commands when available, such as lint, typecheck, tests, build, formatting checks, vetting, or framework-specific verification.
+4. If the repository does not define explicit validation commands, use the narrowest sensible language- or framework-appropriate checks for the files you changed.
+5. If a check fails, read the exact error, inspect local context, research externally only if needed, fix one class of failure at a time, and rerun the relevant check.
+6. Before concluding the task, run broader validation when feasible and appropriate to the scope of the change.
 
 Examples by ecosystem:
 
@@ -161,6 +164,7 @@ Validation rules:
 - Do not assume every repository has lint or typecheck.
 - Do not assume `package.json` exists.
 - Prefer project-defined commands over language defaults.
+- Use the detected toolchain consistently.
 - Do not claim success without evidence.
 - If validation could not be run, state exactly what was not validated.
 
