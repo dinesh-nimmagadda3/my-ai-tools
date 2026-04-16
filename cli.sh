@@ -885,15 +885,36 @@ install_claude_code() {
 }
 
 install_opencode() {
-	_run_opencode_install() {
-		if command -v opencode &>/dev/null; then
-			log_warning "OpenCode is already installed"
-		else
-			execute_installer "https://opencode.ai/install" "" "OpenCode"
+	log_info "Installing OpenCode..."
+
+	if ! command -v opencode &>/dev/null; then
+		if execute "pnpm install -g opencode-ai"; then
 			log_success "OpenCode installed"
+		else
+			log_error "Failed to install OpenCode"
 		fi
-	}
-	run_installer "OpenCode" "_run_opencode_install" "command -v opencode" ""
+		return
+	fi
+
+	log_warning "OpenCode is already installed"
+
+	if [ "$YES_TO_ALL" = true ]; then
+		log_info "Auto-skipping reinstall (--yes flag)"
+		return
+	elif [ -t 0 ]; then
+		if ! prompt_yn "Do you want to reinstall"; then
+			return
+		fi
+	else
+		log_info "Skipping reinstall in non-interactive mode"
+		return
+	fi
+
+	if execute "pnpm install -g opencode-ai"; then
+		log_success "OpenCode reinstalled"
+	else
+		log_error "Failed to reinstall OpenCode"
+	fi
 }
 
 

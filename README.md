@@ -283,7 +283,7 @@ Modern TUI-based coding assistant. [Homepage](https://opencode.ai)
 **MCP:** Connected via Hub HTTP endpoint (`http://localhost:5115/hub`)
 
 ```bash
-curl -fsSL https://opencode.ai/install | bash
+pnpm install -g opencode-ai
 ```
 
 ---
