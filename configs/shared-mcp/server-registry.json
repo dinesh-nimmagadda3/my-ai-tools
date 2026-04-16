@@ -34,6 +34,7 @@
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp",
+      "env": { "CONTEXT7_API_KEY": "your-key-here" },
       "shared": true,
       "enabled": true
     },
@@ -50,12 +51,7 @@
     "filesystem": {
       "type": "stdio",
       "command": "bun",
-      "args": [
-        "x",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "$HOME"
-      ],
+      "args": ["x", "-y", "@modelcontextprotocol/server-filesystem", "$HOME"],
       "shared": true,
       "enabled": true
     },
@@ -74,6 +70,23 @@
         "--chromeArg=--no-sandbox",
         "--chromeArg=--disable-setuid-sandbox"
       ],
+      "shared": true,
+      "enabled": true
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"],
+      "shared": true,
+      "enabled": true
+    },
+    "brave-search": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
+      "env": {
+        "BRAVE_API_KEY": "YOUR_API_KEY_HERE"
+      },
       "shared": true,
       "enabled": true
     }
