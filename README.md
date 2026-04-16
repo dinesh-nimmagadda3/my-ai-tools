@@ -51,11 +51,6 @@ curl -fsSL https://raw.githubusercontent.com/dinesh-nimmagadda3/my-ai-tools/main
 git clone https://github.com/dinesh-nimmagadda3/my-ai-tools.git
 cd my-ai-tools
 ./cli.sh
-
-# Deploy the Hub persistently (Optional but Recommended)
-./cli.sh mcp-hub compose-setup
-./cli.sh mcp-hub service-install
-systemctl --user start shared-mcp
 ```
 
 ---
@@ -112,8 +107,6 @@ Everything gets permanently installed onto your machine:
 | OpenCode config | `~/.config/opencode/` |
 | Codex config | `~/.codex/` |
 | Shared MCP Hub | `~/.ai-tools/shared-mcp/` |
-| Podman Context | `~/projects/my-ai-tools/configs/shared-mcp/` |
-| Systemd Service | `~/.config/systemd/user/shared-mcp.service` |
 | Skills | `~/.claude/skills/`, `~/.gemini/skills/`, etc. |
 | Best practices | `~/.ai-tools/best-practices.md` |
 
@@ -123,36 +116,33 @@ Everything gets permanently installed onto your machine:
 
 Claude Code  ──┐
 Gemini CLI   ──┤──▶  Shared Hub (port 5115)  ──▶  fff, qmd, context7 (Core)
-OpenCode     ──┤      (Podman Compose)           memory (Memory Graph)
+OpenCode     ──┤      (Host Process)             memory (Memory Graph)
 Codex CLI    ──┘       multiplexer.ts            filesystem, devtools (Sys)
                                                  sequential-thinking (Logic)
 ```
 
 **How it works:**
-- **Containerized**: The Hub runs inside a Podman container built from `configs/shared-mcp/Dockerfile` so Chrome DevTools MCP has the runtime libraries it needs.
-- **Persistent**: Managed by `systemd` to ensure it starts on boot and auto-restarts on failure.
-- **Host-integrated**: The container mounts your real home path and host Chrome install so filesystem and browser tools see the same machine state you do.
-- **Standardized**: Uses `configs/shared-mcp/docker-compose.yml` for build and runtime management.
+- **Host-native**: The Hub is installed to `~/.ai-tools/shared-mcp/` and runs directly on the host.
+- **Tool-compatible**: The Hub starts backend MCP servers with host paths so local files, browser profiles, and caches are easy to inspect and edit.
+- **Centralized**: Each AI tool connects to the same `http://localhost:5115/hub` endpoint through the installed bridge.
 
 **Management Commands:**
 
 ```bash
-./cli.sh mcp-hub compose-up      # Launch the cluster
-./cli.sh mcp-hub compose-down    # Stop the cluster
-./cli.sh mcp-hub service-install # Register systemd unit
-./cli.sh mcp-hub cleanup-legacy  # Wipe stale local processes
+./cli.sh mcp-hub start   # Start the host Hub
+./cli.sh mcp-hub stop    # Stop the host Hub
+./cli.sh mcp-hub status  # Check Hub health
 ```
 
 **Verification:**
 ```bash
-systemctl --user status shared-mcp  # Check service status
-podman ps                           # Verify container health
-journalctl --user -u shared-mcp -f  # Watch hub logs & heartbeats
+curl -sS http://localhost:5115/status | jq .  # Check Hub status
+tail -f ~/.ai-tools/shared-mcp/hub.log        # Watch Hub logs
 ```
 
 **Adding a new MCP server:**
 
-Edit `configs/shared-mcp/server-registry.json` and add:
+Edit the installed registry at `~/.ai-tools/shared-mcp/server-registry.json` and add:
 
 ```json
 "my-new-server": {
@@ -163,7 +153,14 @@ Edit `configs/shared-mcp/server-registry.json` and add:
 }
 ```
 
-All connected tools will automatically inherit the new server. No client reconfiguration needed.
+Restart the Hub after registry changes:
+
+```bash
+./cli.sh mcp-hub stop
+./cli.sh mcp-hub start
+```
+
+All connected tools will inherit the new server after reconnecting. No client reconfiguration is needed.
 
 > 📖 **Full MCP reference, per-server configs, and maintenance checklist:** [MCP.md](MCP.md)
 

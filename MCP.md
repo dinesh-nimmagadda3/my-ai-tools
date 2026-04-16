@@ -2,7 +2,8 @@
 
 This document is the single source of truth for all MCP servers registered in the **Shared Hub (V5)**. Each entry includes the upstream repository link, the correct configuration, how to verify alignment, and any optional tuning.
 
-> **Hub Registry File:** [`configs/shared-mcp/server-registry.json`](configs/shared-mcp/server-registry.json)
+> **Source Registry File:** [`configs/shared-mcp/server-registry.json`](configs/shared-mcp/server-registry.json)
+> **Installed Registry File:** `~/.ai-tools/shared-mcp/server-registry.json`
 > **Hub Source:** [`configs/shared-mcp/multiplexer.ts`](configs/shared-mcp/multiplexer.ts)
 > **Hub Runs At:** `http://localhost:5115`
 
@@ -117,7 +118,7 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/HEAD/src/
   "command": "qmd",
   "args": ["mcp"],
   "env": {
-    "XDG_CACHE_HOME": "/app/.shared-mcp-data/cache"
+    "XDG_CACHE_HOME": "$HOME/.ai-tools/shared-mcp/cache"
   },
   "shared": true,
   "enabled": true
@@ -166,11 +167,11 @@ qmd mcp --help
   "command": "fff-mcp",
   "args": [
     "--frecency-db",
-    "/app/.shared-mcp-data/fff/frecency.mdb",
+    "$HOME/.ai-tools/shared-mcp/data/fff/frecency.mdb",
     "--history-db",
-    "/app/.shared-mcp-data/fff/history.mdb",
+    "$HOME/.ai-tools/shared-mcp/data/fff/history.mdb",
     "--log-file",
-    "/app/.shared-mcp-data/fff/fff-mcp.log"
+    "$HOME/.ai-tools/shared-mcp/data/fff/fff-mcp.log"
   ],
   "shared": true,
   "enabled": true
@@ -265,7 +266,7 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 > [!TIP]
 > Use **`$HOME`** in the path arguments to ensure the server works correctly regardless of the user account.
 
-In the containerized hub deployment, `$HOME` is mounted to the same absolute host path so filesystem tools expose your real home directory instead of `/root`.
+The host Hub expands `$HOME` to the current user's home directory, so filesystem tools expose the same files you can inspect from the terminal.
 
 **MCP Tools exposed:**
 - `read_text_file` / `read_multiple_files` — Read file contents
@@ -304,7 +305,7 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
     "--executablePath",
     "/opt/google/chrome/chrome",
     "--userDataDir",
-    "/app/.shared-mcp-data/chrome-profile",
+    "$HOME/.ai-tools/shared-mcp/chrome-profile",
     "--chromeArg=--no-sandbox",
     "--chromeArg=--disable-setuid-sandbox"
   ],
@@ -321,7 +322,7 @@ curl -s https://raw.githubusercontent.com/modelcontextprotocol/servers/main/src/
 
 **Capabilities & Limitations:**
 - **Headless Mode**: ✅ Supported via `--headless` flag (enabled in our default config).
-- **Chrome Runtime**: The container mounts the host Chrome install at `/opt/google/chrome` and uses a writable profile under `/app/.shared-mcp-data/chrome-profile`.
+- **Chrome Runtime**: The host Hub uses the Chrome install at `/opt/google/chrome` and a writable profile under `~/.ai-tools/shared-mcp/chrome-profile`.
 - **Firefox Support**: ❌ Not officially supported. The server is purpose-built for Chromium-based browsers via the Chrome DevTools Protocol (CDP).
 
 **How to verify alignment:**

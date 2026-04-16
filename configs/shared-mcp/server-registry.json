@@ -5,7 +5,7 @@
       "command": "qmd",
       "args": ["mcp"],
       "env": {
-        "XDG_CACHE_HOME": "/app/.shared-mcp-data/cache"
+        "XDG_CACHE_HOME": "$HOME/.ai-tools/shared-mcp/cache"
       },
       "shared": true,
       "enabled": true
@@ -15,11 +15,11 @@
       "command": "fff-mcp",
       "args": [
         "--frecency-db",
-        "/app/.shared-mcp-data/fff/frecency.mdb",
+        "$HOME/.ai-tools/shared-mcp/data/fff/frecency.mdb",
         "--history-db",
-        "/app/.shared-mcp-data/fff/history.mdb",
+        "$HOME/.ai-tools/shared-mcp/data/fff/history.mdb",
         "--log-file",
-        "/app/.shared-mcp-data/fff/fff-mcp.log"
+        "$HOME/.ai-tools/shared-mcp/data/fff/fff-mcp.log"
       ],
       "shared": true,
       "enabled": true
@@ -66,7 +66,7 @@
         "--executablePath",
         "/opt/google/chrome/chrome",
         "--userDataDir",
-        "/app/.shared-mcp-data/chrome-profile",
+        "$HOME/.ai-tools/shared-mcp/chrome-profile",
         "--chromeArg=--no-sandbox",
         "--chromeArg=--disable-setuid-sandbox"
       ],

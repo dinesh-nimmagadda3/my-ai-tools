@@ -35,7 +35,6 @@
       "Bash(kubectl get:*)",
       "Bash(kubectl logs:*)",
       "Bash(kubectl rollout status:*)",
-      "Bash(docker-compose up:*)",
       "Bash(npm update:*)",
       "Bash(npm install:*)",
       "Bash(npm show:*)",

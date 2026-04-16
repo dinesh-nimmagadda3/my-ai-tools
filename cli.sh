@@ -958,6 +958,9 @@ install_shared_mcp() {
 
 	execute_quoted mkdir -p "$target_hub_dir"
 	safe_copy_dir "$source_hub_dir" "$target_hub_dir"
+	execute_quoted mkdir -p "$target_hub_dir/cache"
+	execute_quoted mkdir -p "$target_hub_dir/data/fff"
+	execute_quoted mkdir -p "$target_hub_dir/chrome-profile"
 
 	if [ "$DRY_RUN" = true ]; then
 		log_info "[DRY RUN] (cd $target_hub_dir && bun install)"
@@ -990,6 +993,10 @@ mcp-hub() {
 	local hub_dir="$HOME/.ai-tools/shared-mcp"
 	local pid_file="$hub_dir/hub.pid"
 	local log_file="$hub_dir/hub.log"
+	local hub_path="$PATH"
+	[[ ":$hub_path:" != *":$HOME/.local/bin:"* ]] && hub_path="$HOME/.local/bin:$hub_path"
+	local bun_bin; bun_bin=$(bun pm bin -g 2>/dev/null || true)
+	[[ -n "$bun_bin" && ":$hub_path:" != *":$bun_bin:"* ]] && hub_path="$bun_bin:$hub_path"
 	
 	case "$action" in
 		start)
@@ -999,22 +1006,22 @@ mcp-hub() {
 			fi
 			if lsof -i :5115 >/dev/null 2>&1; then
 				log_warning "Port 5115 is already in use. Attempting to clear..."
-				fuser -k 5115/tcp 2>/dev/null || true
-				sleep 1
+				if [ "$DRY_RUN" = true ]; then
+					log_info "[DRY RUN] Would stop process listening on port 5115"
+				else
+					fuser -k 5115/tcp 2>/dev/null || true
+					sleep 1
+				fi
 			fi
 
 			log_info "Starting Shared MCP Hub V5..."
 			if [ "$DRY_RUN" = true ]; then
-				log_info "[DRY RUN] (cd $hub_dir && export PATH=\"$hub_path\" BUN_TMPDIR=/tmp BUN_INSTALL=/tmp && nohup bun run multiplexer.ts > $log_file 2>&1 & echo \$! > $pid_file)"
+				log_info "[DRY RUN] (cd $hub_dir && setsid env PATH=\"$hub_path\" BUN_TMPDIR=/tmp BUN_INSTALL=/tmp bun run multiplexer.ts > $log_file 2>&1 < /dev/null & echo \$! > $pid_file)"
 				return 0
 			fi
-			# Ensure common paths are available to the Hub
-			local hub_path="$PATH"
-			[[ ":$hub_path:" != *":$HOME/.local/bin:"* ]] && hub_path="$HOME/.local/bin:$hub_path"
-			local bun_bin; bun_bin=$(bun pm bin -g 2>/dev/null)
-			[[ -n "$bun_bin" && ":$hub_path:" != *":$bun_bin:"* ]] && hub_path="$bun_bin:$hub_path"
+			mkdir -p "$hub_dir/cache" "$hub_dir/data/fff" "$hub_dir/chrome-profile"
 
-			(cd "$hub_dir" && export PATH="$hub_path" BUN_TMPDIR=/tmp BUN_INSTALL=/tmp && nohup bun run multiplexer.ts > "$log_file" 2>&1 & echo $! > "$pid_file")
+			(cd "$hub_dir" && setsid env PATH="$hub_path" BUN_TMPDIR=/tmp BUN_INSTALL=/tmp bun run multiplexer.ts > "$log_file" 2>&1 < /dev/null & echo $! > "$pid_file")
 			
 			local count=0
 			local max_retries=15
@@ -1032,63 +1039,6 @@ mcp-hub() {
 			rm -f "$pid_file"
 			return 1
 			;;
-		compose-setup)
-			log_info "Setting up Podman Compose deployment..."
-			# Cleanup legacy Kube files if they exist
-			rm -f "$SCRIPT_DIR/configs/shared-mcp/hub-pod.yaml"
-			rm -f "$HOME/.config/systemd/user/shared-mcp-pod.service"
-			
-			log_success "Podman Compose environment ready at $SCRIPT_DIR/configs/shared-mcp/docker-compose.yml"
-			log_info "You can now run './cli.sh mcp-hub service-install' or 'podman-compose up -d'"
-			;;
-		service-install)
-			log_info "Installing Systemd user service for Shared MCP Hub (Compose)..."
-			mkdir -p "$HOME/.config/systemd/user"
-			local unit_src="$SCRIPT_DIR/configs/shared-mcp/shared-mcp.service"
-			local unit_dest="$HOME/.config/systemd/user/shared-mcp.service"
-			
-			# Substitute variables in unit file
-			sed "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" "$unit_src" > "$unit_dest"
-			
-			systemctl --user daemon-reload
-			systemctl --user enable podman.socket
-			systemctl --user enable shared-mcp.service
-			log_success "Systemd service installed and enabled at $unit_dest"
-			log_info "Use 'systemctl --user start shared-mcp' to launch"
-			;;
-		compose-up)
-			log_info "Launching Hub via Podman Compose..."
-			(cd "$SCRIPT_DIR/configs/shared-mcp" && export PROJECT_DIR="$SCRIPT_DIR" && podman compose up -d)
-			log_success "Podman Compose deployment active"
-			;;
-		compose-down)
-			log_info "Stopping Podman Compose deployment..."
-			(cd "$SCRIPT_DIR/configs/shared-mcp" && podman compose down)
-			log_success "Podman Compose deployment stopped"
-			;;
-		cleanup-legacy)
-			log_info "Cleaning up legacy (non-containerized) Hub artifacts..."
-			# 1. Kill any stale local processes
-			if [ -f "$HOME/.ai-tools/shared-mcp/hub.pid" ]; then
-				local pid=$(cat "$HOME/.ai-tools/shared-mcp/hub.pid")
-				kill "$pid" 2>/dev/null || true
-				rm -f "$HOME/.ai-tools/shared-mcp/hub.pid"
-			fi
-			fuser -k 5115/tcp 2>/dev/null || true
-			
-			# 2. Remove legacy systemd units
-			rm -f "$HOME/.config/systemd/user/shared-mcp-pod.service"
-			systemctl --user daemon-reload
-			
-			# 3. Clean up old logs
-			rm -f "$HOME/.ai-tools/shared-mcp/hub.log"
-			
-			log_success "Legacy cleanup complete. Only Podman services remain."
-			;;
-		podman-setup | podman-start | podman-stop)
-			log_error "Deprecated command. Please use 'mcp-hub compose-setup' or 'mcp-hub service-install'"
-			exit 1
-			;;
 		stop)
 			if [ -f "$pid_file" ]; then
 				local pid=$(cat "$pid_file")
@@ -1101,9 +1051,14 @@ mcp-hub() {
 			fi
 			;;
 		status)
-			if [ -f "$pid_file" ] && kill -0 $(cat "$pid_file") 2>/dev/null; then
-				local pid=$(cat "$pid_file")
-				log_success "Hub Process ACTIVE (PID: $pid)"
+			if curl -s http://localhost:5115/status >/dev/null 2>&1; then
+				local pid=""
+				[ -f "$pid_file" ] && pid=$(cat "$pid_file")
+				if [ -f "$pid_file" ] && kill -0 "$pid" 2>/dev/null; then
+					log_success "Hub Process ACTIVE (PID: $pid)"
+				else
+					log_success "Hub Endpoint ACTIVE on http://localhost:5115"
+				fi
 				echo "--- Health Dashboard ---"
 				curl -s http://localhost:5115/status | jq .
 			else
@@ -1111,7 +1066,7 @@ mcp-hub() {
 			fi
 			;;
 		*)
-			echo "Usage: $0 mcp_hub {start|stop|status}"
+			echo "Usage: $0 mcp-hub {start|stop|status}"
 			;;
 	esac
 }
