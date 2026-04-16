@@ -185,15 +185,16 @@ class McpHubV5 {
     logger.info(`[Hub] Connecting to backend: ${name} (${config.type})`);
     let transport;
     if (config.type === "stdio") {
-      const home = process.env.HOME || "";
-      const command = resolveCommand(config.command, home);
-      const args = (config.args || []).map((arg: string) => arg.replace("$HOME", home));
+      const commandHome = process.env.HOME || "";
+      const pathHome = process.env.HOST_HOME || commandHome;
+      const command = resolveCommand(config.command, commandHome);
+      const args = (config.args || []).map((arg: string) => arg.replace("$HOME", pathHome));
       const env = { ...process.env };
       const bunTmpDir = process.env.BUN_TMPDIR || "/tmp";
       const bunInstallDir = process.env.BUN_INSTALL || "/tmp";
       if (config.env) {
         for (const [key, value] of Object.entries(config.env)) {
-          env[key] = (value as string).replace("$HOME", home);
+          env[key] = (value as string).replace("$HOME", pathHome);
         }
       }
       if (config.command === "bun") {

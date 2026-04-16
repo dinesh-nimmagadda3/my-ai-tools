@@ -6,14 +6,16 @@ services:
     image: shared-mcp-hub:local
     container_name: shared-mcp-hub
     working_dir: /app/configs/shared-mcp
-    command: /bin/sh -lc "bun install && bun run multiplexer.ts"
+    command: /bin/sh -lc "if [ ! -d node_modules ]; then bun install --frozen-lockfile; fi && bun run multiplexer.ts"
     ports:
       - "5115:5115"
     environment:
+      - BUN_INSTALL_CACHE_DIR=/tmp/.bun-cache
       - NODE_ENV=production
       - PORT=5115
-      - HOME=${HOME}
-      - PATH=${HOME}/.bun/bin:${HOME}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
+      - HOME=/root
+      - HOST_HOME=${HOME}
+      - PATH=/root/.bun/bin:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
     volumes:
       - ${PROJECT_DIR}:/app:z
       - ${HOME}:${HOME}

@@ -1030,6 +1030,7 @@ mcp-hub() {
 			sed "s|\$REPLACE_WITH_PROJECT_DIR|$SCRIPT_DIR|g" "$unit_src" > "$unit_dest"
 			
 			systemctl --user daemon-reload
+			systemctl --user enable podman.socket
 			systemctl --user enable shared-mcp.service
 			log_success "Systemd service installed and enabled at $unit_dest"
 			log_info "Use 'systemctl --user start shared-mcp' to launch"

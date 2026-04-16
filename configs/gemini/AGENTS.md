@@ -13,8 +13,9 @@
 - Follow git safety guidelines @~/.ai-tools/git-guidelines.md
 - Keep responses concise and actionable.
 - Always propose a plan before edits. Use phases to break down tasks into manageable steps.
-- Run typecheck, lint and biome on js/ts file changes after finish.
-- Prefer to use **Bun** to run scripts if possible (`bun run`, `bun test`), otherwise use `tsx` for .ts files.
+- For JS/TS changes, run the project's existing validation commands after finishing. Use the repo's configured typecheck, lint, test, and formatter tools instead of assuming `biome`.
+- Detect the project's package manager and task runner from lockfiles, `packageManager`, and existing scripts. Prefer the repo's current toolchain (`pnpm`, `npm`, `yarn`, `bun`, etc.) instead of defaulting to `bun`.
+- Detection order for JS/TS repos: check `package.json#packageManager`, then lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`/`bun.lock`), then existing scripts, then lint/format config files (`eslint`, `biome`, `prettier`, etc.).
 - Never run destructive commands.
 - Use our conventions for file names, tests, and commands.
 - Keep your code clean and organized. Do not over-engineer or overcomplicate things unnecessarily.

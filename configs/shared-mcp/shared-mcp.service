@@ -1,8 +1,8 @@
 [Unit]
 Description=Shared MCP Hub (Podman Compose)
 Documentation=https://github.com/dinesh-nimmagadda3/my-ai-tools
-After=network-online.target
-Wants=network-online.target
+After=network-online.target podman.socket
+Wants=network-online.target podman.socket
 
 [Service]
 Type=simple

@@ -18,6 +18,11 @@
 ## Project
 my-ai-tools: Configuration management repository for AI coding tools (Claude Code, Gemini, OpenCode, and Codex) and their integration with MCP servers and plugins.
 
+## General Practices
+- For JS/TS changes, run the project's existing validation commands after finishing. Use the repo's configured typecheck, lint, test, and formatter tools instead of assuming `biome`.
+- Detect the project's package manager and task runner from lockfiles, `packageManager`, and existing scripts. Prefer the repo's current toolchain (`pnpm`, `npm`, `yarn`, `bun`, etc.) instead of defaulting to `bun`.
+- Detection order for JS/TS repos: check `package.json#packageManager`, then lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`/`bun.lock`), then existing scripts, then lint/format config files (`eslint`, `biome`, `prettier`, etc.).
+
 ## Build/Lint/Test Commands
 
 ### Shell Script Validation
